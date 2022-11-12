@@ -1,0 +1,101 @@
+*, *::after, *::after{
+    box-sizing: border-box;
+    margin: auto;
+    font-family: "Work Sans", sans-serif;
+    
+}
+html {
+    background-color: black;
+}
+header {
+    padding: 30px 20px;
+}
+h1 {
+    text-align: center;
+    padding: 10px 0;
+    letter-spacing: .1em;
+    font-size: 1.75em;
+    font-weight: 400;
+    color: rgb(1, 254, 149);
+}
+h2 {
+    text-align: center;
+    padding: 10px 0;
+}
+#redh3{
+    color:red;
+}
+h4{
+    color: red;
+}
+nav {
+    display: flex;
+    flex: auto;
+}
+.nav-links, .nav-links:link {
+    flex: auto;
+    padding: 2px;
+    letter-spacing: .5em;
+    font-weight: 190;
+    color: rgb(1, 254, 149);
+    line-height: 2em;
+    text-decoration: none;
+}
+#mainhome {
+    margin: auto;
+    padding: 10px;
+    text-align: center;
+}
+li{
+    list-style: none;
+    text-align: center;
+    padding: 2px;
+}
+footer {
+    background-color:rgb(1, 254, 149);
+    display: flex;
+    text-align: center;
+    padding: 30px 20px;
+    line-height: 2em;
+    font-weight: 250;
+    color: black;
+}
+.footer-items{
+    flex: auto;
+    padding: 10px;
+    font-weight: 250;
+    color: black;
+}
+#div-container{
+    display: flex;
+    flex: 0 1 auto;
+}
+/* a, a:link {
+    background-color: rgb(40, 40, 40); 
+    
+} */
+a:hover, a:active {
+    background-color: #f900a6;
+}
+#item1{
+    display: flex;
+    padding: 1px;
+    flex-direction: row;
+}
+#item2{
+    display: flex;
+    padding: 1px;
+    flex-direction: row;
+}
+#item3{
+    display: flex;
+    padding: 1px;
+    flex-direction: column;
+}
+.webImage {
+    padding: 1px;
+}
+.red{
+    font-size: 12px;
+    color: red;
+}
