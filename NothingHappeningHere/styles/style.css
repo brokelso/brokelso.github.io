@@ -34,7 +34,7 @@ nav {
     color:  rgb(1, 254, 149);
     line-height: 2em;
 }
-.nav-links, .nav-links:link, .nav-links:visited {
+.nav-links, .nav-links:link, .nav-links:visited:active {
     flex: auto;
     padding: 10px;
     letter-spacing: .5em;
@@ -44,6 +44,7 @@ nav {
     text-decoration: none;
     
 }
+
 a:hover{
     background-color: #f900a6;
 }

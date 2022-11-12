@@ -37,6 +37,9 @@ nav {
     color: black;
     line-height: 2em;
 }
+.nav-links:active a:active{
+    color:  #f900a6;
+}
 #mainhome {
     margin: auto;
     padding: 10px;
@@ -47,8 +50,9 @@ li{
     text-align: center;
     padding: 2px;
 }
-a, a:link {
+a, a:link, a:active {
     text-decoration: none;
+    
 }
 a:visted {
     text-decoration:line-through;

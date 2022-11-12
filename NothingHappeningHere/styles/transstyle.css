@@ -37,6 +37,9 @@ nav {
     color: black;
     line-height: 2em;
 }
+.nav-links:active{
+    color:  #f900a6;
+}
 #mainhome {
     margin: auto;
     padding: 10px;
