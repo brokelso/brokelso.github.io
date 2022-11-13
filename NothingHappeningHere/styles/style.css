@@ -27,25 +27,22 @@ h2 {
 }
 nav {
     display: flex;
-    flex: auto;
     padding: 10px;
-    letter-spacing: .5em;
-    font-weight: 190;
-    color:  rgb(1, 254, 149);
-    line-height: 2em;
 }
-.nav-links, .nav-links:link, .nav-links:visited:active {
-    flex: auto;
+.nav-links, .nav-links:link{
+    margin: 0;
+    text-align: center;
+    display: block;
     padding: 10px;
     letter-spacing: .5em;
     font-weight: 190;
     color:  rgb(1, 254, 149);
-    line-height: 2em;
+    line-height: 1.5em;
     text-decoration: none;
     
 }
 
-a:hover{
+a:hover, .nav-links:hover{
     background-color: #f900a6;
 }
 #redh3{

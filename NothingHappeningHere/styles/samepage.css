@@ -27,18 +27,27 @@ h2 {
 }
 nav {
     display: flex;
-    flex: auto;
+    padding: 10px;
 }
 .nav-links, .nav-links:link{
-    flex: auto;
+    margin: 0;
+    text-align: center;
+    display: block;
     padding: 10px;
     letter-spacing: .5em;
     font-weight: 190;
-    color: black;
-    line-height: 2em;
+    color:  black;
+    line-height: 1.5em;
+    text-decoration: none;
+    
 }
-.nav-links:active{
-    color:  #f900a6;
+
+a:hover, .nav-links:hover{
+    background-color: #f900a6;
+}
+#h1top, #h1top:hover{
+    text-decoration: none;
+    background-color:  rgb(1, 254, 149);
 }
 #mainhome {
     margin: auto;
