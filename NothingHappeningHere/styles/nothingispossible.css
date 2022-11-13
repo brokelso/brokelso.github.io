@@ -122,17 +122,18 @@ a:hover, a:active {
     color: red;
 }
 footer {
-    background-color:rgb(1, 254, 149);
-    display: flex;
+    background-color: rgb(1, 254, 149);
     text-align: center;
     padding: 30px 20px;
-    line-height: 2em;
     font-weight: 250;
     color: black;
 }
 .footer-items, .footer-items:link{
-    flex: auto;
-    padding: 10px;
+    display: block;
+    padding: 5px;
     font-weight: 250;
     color: black;
+    text-decoration: none;
+    letter-spacing: .05em;
+    
 }
