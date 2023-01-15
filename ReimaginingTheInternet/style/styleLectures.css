@@ -1,0 +1,44 @@
+#gridcontainerLectures {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    padding: auto;
+    margin: 35px ;
+    
+}
+
+.griditemsLectures {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    width: auto;
+    border:1px solid rgb(236, 207, 212);
+    margin: 10px auto;
+    padding: 10px;
+    text-align: center;
+    align-items: center;
+    box-shadow:
+    0 2.8px 2.2px rgba(0, 0, 0, 0.034),
+    0 6.7px 5.3px rgba(0, 0, 0, 0.048),
+    0 12.5px 10px rgba(0, 0, 0, 0.06),
+    0 12.5px 12.59px rgba(0, 0, 0, 0.072),
+    0 12.5px 15px rgba(0, 0, 0, 0.086),
+    0 12.5px 15px rgba(0, 0, 0, 0.12)
+  ;
+    border-radius: 5px;
+
+}
+
+.lectures {
+    height: 409px;
+    width: 727px;
+ }
+
+@media only screen and (max-width: 700px) {
+
+    .lectures {
+       height: 200px;
+       width: 355px;
+    }
+
+}

@@ -1,0 +1,51 @@
+#syllabus{
+    margin: 50px 100px;
+}
+
+#intro {
+    font-family: Inter;
+    margin: auto auto 15px auto;
+}
+
+#contents{
+    font-family: Inter;
+}
+
+a, a:visited {
+    color: rgb(183, 108, 121);
+    
+}
+
+.url {
+    text-decoration: underline;
+    color: rgb(183, 108, 121);
+}
+
+.divider {
+    background-color: rgb(214, 176, 182);
+}
+
+h3 {
+    color:rgb(125, 132, 158);
+}
+
+#syllabusgridcontainer {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: auto;
+    padding: auto;
+    margin: 35px 10px;
+
+}
+
+.syllabusitem{
+    font-weight: normal;
+    padding: 10px;
+}
+
+.syllabusitemweek{
+    padding: 10px;
+    font-weight:900;
+    text-align: center;
+    
+}

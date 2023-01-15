@@ -1,0 +1,179 @@
+* {
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: white;
+}
+
+header {
+    background-color: rgb(183, 108, 121);
+    width: 100%;
+}
+
+#flexcontainer {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+    justify-content: space-between;
+    text-align: center;
+}
+
+#clouds {
+    width: 100%;
+    display:flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    z-index: 1;
+    animation: float 6s ease-in-out infinite;
+}
+.cloudimage{
+    display:flex;
+}
+#title{
+    padding: 0px 50px;
+    /* background-color:rgb(172 175 187); */
+    background-color:rgb(183, 108, 121);
+    /* border-bottom: 1px solid black;
+    border-top: 1px solid black; */
+}
+
+.title{
+    display: flex;
+    width: 100%;
+    font-family: Works Sans;
+    font-size: 40px;
+    height: auto;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    letter-spacing: 10px;
+    z-index: 0;
+    overflow: visible;
+    color: white;
+    /* background-color:rgb(172 175 187); */
+}
+
+.TitlePage {
+    color: rgb(125, 132, 158);
+    text-align: center;
+    margin: 25px auto;
+}
+
+#gridcontainer {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 20em 20em;
+    padding: auto;
+    margin: 35px ;
+    
+}
+
+a, a:visited, a:active {
+    text-decoration: none;
+    color: inherit;
+}
+
+a:hover, h2:hover{
+    color: rgb(68, 72, 87);
+}
+
+h2, h2:visited, h2:active {
+    margin: 10px;
+    padding: 10px auto;
+    font-size: 20px;
+    font-family: Inter;
+    font-weight: 300;
+    color:rgb(125, 132, 158);
+    text-decoration: none;
+}
+
+.griditems {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    width: 90%;
+    border:1px solid rgb(236, 207, 212);
+    margin: 10px auto;
+    padding: 10px;
+    text-align: center;
+    align-items: center;
+    box-shadow:
+    0 2.8px 2.2px rgba(0, 0, 0, 0.034),
+    0 6.7px 5.3px rgba(0, 0, 0, 0.048),
+    0 12.5px 10px rgba(0, 0, 0, 0.06),
+    0 12.5px 12.59px rgba(0, 0, 0, 0.072),
+    0 12.5px 15px rgba(0, 0, 0, 0.086),
+    0 12.5px 15px rgba(0, 0, 0, 0.12)
+  ;
+    border-radius: 5px;
+
+}
+/* adopted animation https://codepen.io/MarioDesigns/pen/woJgeo */
+@keyframes float {
+	0% {
+		transform: translatey(0px);
+	}
+	50% {
+		transform: translatey(-20px);
+	}
+	100% {
+		transform: translatey(0px);
+	}
+}
+
+footer {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    background-color:rgb(236, 207, 212);
+}
+
+.footeritem {
+    display: flex;
+    justify-content: space-evenly;
+    margin: 10px auto;
+    padding: 10px;
+    text-align: center;
+    align-items: center;
+    color: rgb(125, 132, 158);
+    
+
+}
+
+
+
+
+
+@media only screen and (max-width: 600px) {
+    .cloudimage{
+        width: 100px;
+        height: auto;
+    }
+    #title{
+        width: 100%;
+        font-size: 20px;
+        padding: 50px 10px 5px 10px;
+    }
+    .title {
+        font-size: 20px;
+    }
+    #gridcontainer {
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-rows: 20em 20em 20em 20em 20em 20em;
+   
+    }
+    h2 {
+        padding: 10px auto;
+        
+    }
+    .griditems {
+        display: flex;
+  
+}
+}
