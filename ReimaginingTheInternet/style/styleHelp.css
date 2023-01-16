@@ -29,11 +29,36 @@
 
 }
 
-@media only screen and (max-width: 800px){
+@media only screen and (max-width: 600px){
   #gridcontainerHelp{
       display: grid;
       grid-template-columns: 1fr;
       grid-template-rows: auto;
-  
   }
+  .cloudimage{
+      width: 100px;
+      height: auto;
+  }
+  #title{
+      width: 100%;
+      font-size: 20px;
+      padding: 50px 10px 5px 10px;
+  }
+  .title {
+      font-size: 20px;
+  }
+  #gridcontainer {
+      display: grid;
+      grid-template-columns: 1fr;
+      grid-template-rows: 20em 20em 20em 20em;
+ 
+  }
+  h2 {
+      padding: 10px auto;
+      
+  }
+  .griditems {
+      display: flex;
+
+}
 }

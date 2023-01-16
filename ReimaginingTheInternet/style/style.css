@@ -165,7 +165,7 @@ footer {
     #gridcontainer {
         display: grid;
         grid-template-columns: 1fr;
-        grid-template-rows: 20em 20em 20em 20em 20em 20em;
+        grid-template-rows: 20em 20em 20em 20em;
    
     }
     h2 {
