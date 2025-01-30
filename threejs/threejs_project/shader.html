@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js Shader Demo</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div id="container"></div>
+
+    <!-- Load Three.js from the official CDN -->
+    <script type="module">
+        import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.153.0/build/three.module.js';
+    
+        let container, camera, scene, renderer, uniforms;
+    
+        init();
+        animate();
+    
+        function init() {
+            container = document.getElementById('container');
+    
+            // Set up the camera
+            camera = new THREE.Camera();
+            camera.position.z = 1;
+    
+            // Create the scene
+            scene = new THREE.Scene();
+    
+            // Create a plane geometry
+            const geometry = new THREE.PlaneGeometry(2, 2);
+    
+            // Define shader uniforms
+            uniforms = {
+                u_time: { value: 1.0 },
+                u_resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) }
+            };
+    
+            // Create the shader material
+            const material = new THREE.ShaderMaterial({
+                uniforms: uniforms,
+                vertexShader: document.getElementById('vertexShader').textContent,
+                fragmentShader: document.getElementById('fragmentShader').textContent
+            });
+    
+            // Create the mesh and add it to the scene
+            const mesh = new THREE.Mesh(geometry, material);
+            scene.add(mesh);
+    
+            // Set up the renderer
+            renderer = new THREE.WebGLRenderer();
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            container.appendChild(renderer.domElement);
+    
+            // Handle window resize
+            window.addEventListener('resize', onWindowResize, false);
+        }
+    
+        function onWindowResize() {
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            uniforms.u_resolution.value.set(window.innerWidth, window.innerHeight);
+        }
+    
+        function animate() {
+            requestAnimationFrame(animate);
+            uniforms.u_time.value += 0.05; // Update time for animation
+            renderer.render(scene, camera);
+        }
+    </script>
+    
+
+    <script id="vertexShader" type="x-shader/x-vertex">
+    void main() {
+        gl_Position = vec4(position, 1.0);
+    }
+    </script>
+
+    <script id="fragmentShader" type="x-shader/x-fragment">
+    uniform vec2 u_resolution;
+    uniform float u_time;
+
+    void main() {
+        vec2 st = gl_FragCoord.xy / u_resolution.xy;
+        gl_FragColor = vec4(st.x, st.y, 0.0, 1.0);
+    }
+    </script>
+
+    <script>
+        let container, camera, scene, renderer, uniforms;
+
+        init();
+        animate();
+
+        function init() {
+            container = document.getElementById('container');
+
+            // Set up the camera
+            camera = new THREE.Camera();
+            camera.position.z = 1;
+
+            // Create the scene
+            scene = new THREE.Scene();
+
+            // Create a plane geometry
+            const geometry = new THREE.PlaneGeometry(2, 2);
+
+            // Define shader uniforms
+            uniforms = {
+                u_time: { value: 1.0 },
+                u_resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) }
+            };
+
+            // Create the shader material
+            const material = new THREE.ShaderMaterial({
+                uniforms: uniforms,
+                vertexShader: document.getElementById('vertexShader').textContent,
+                fragmentShader: document.getElementById('fragmentShader').textContent
+            });
+
+            // Create the mesh and add it to the scene
+            const mesh = new THREE.Mesh(geometry, material);
+            scene.add(mesh);
+
+            // Set up the renderer
+            renderer = new THREE.WebGLRenderer();
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            container.appendChild(renderer.domElement);
+
+            // Handle window resize
+            window.addEventListener('resize', onWindowResize, false);
+        }
+
+        function onWindowResize() {
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            uniforms.u_resolution.value.set(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            uniforms.u_time.value += 0.05; // Update time for animation
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+</html>
