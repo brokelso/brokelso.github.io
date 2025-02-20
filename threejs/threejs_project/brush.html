@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painterly Shader with Three.js</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+
+<script>
+let scene, camera, renderer;
+let renderTarget, prevRenderTarget, shaderMaterial;
+let mouse = new THREE.Vector2(-1, -1);
+let isDrawing = false;
+
+// Initialize Three.js Scene
+function init() {
+    scene = new THREE.Scene();
+    camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+    
+    renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Create Render Targets for Persistent Drawing
+    renderTarget = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight);
+    prevRenderTarget = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight);
+
+    // Shader Material for Painting Effect
+    shaderMaterial = new THREE.ShaderMaterial({
+        uniforms: {
+            previousTexture: { value: prevRenderTarget.texture },
+            mouse: { value: new THREE.Vector2(-1, -1) },
+            resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+            brushColor: { value: new THREE.Color(1, 0.5, 1) }, // Painterly color
+            time: { value: 0.0 }
+        },
+        vertexShader: `
+            varying vec2 vUv;
+            void main() {
+                vUv = uv;
+                gl_Position = vec4(position, 1.0);
+            }
+        `,
+        fragmentShader: `
+            uniform sampler2D previousTexture;
+            uniform vec2 mouse;
+            uniform vec2 resolution;
+            uniform vec3 brushColor;
+            uniform float time;
+            varying vec2 vUv;
+
+            // Random noise function for painterly texture
+            float random(vec2 p) {
+                return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
+            }
+
+            // Painterly brush effect
+            float brushEffect(vec2 uv, vec2 mousePos) {
+                float dist = distance(uv, mousePos);
+                float brush = smoothstep(0.08, 0.02, dist); // Brush softness
+                brush *= 0.5 + 0.5 * sin(time + random(uv) * 5.0); // Add variation
+                return brush;
+            }
+
+            void main() {
+                vec4 prevColor = texture2D(previousTexture, vUv);
+                
+                // Convert mouse position to UV space
+                vec2 mouseUV = mouse / resolution;
+                mouseUV.y = 1.0 - mouseUV.y;
+
+                float brush = brushEffect(vUv, mouseUV);
+
+                // Mix old strokes with new ones for blending
+                vec3 color = mix(prevColor.rgb, brushColor, brush);
+
+                gl_FragColor = vec4(color, 1.0);
+            }
+        `
+    });
+
+    // Full-Screen Quad to Render Shader
+    let geometry = new THREE.PlaneGeometry(2, 2);
+    let quad = new THREE.Mesh(geometry, shaderMaterial);
+    scene.add(quad);
+
+    // Event Listeners for Mouse Input
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mousedown", () => isDrawing = true);
+    window.addEventListener("mouseup", () => isDrawing = false);
+
+    animate();
+}
+
+// Handle Mouse Movement & Update Shader
+function onMouseMove(event) {
+    if (isDrawing) {
+        mouse.x = event.clientX;
+        mouse.y = event.clientY;
+        shaderMaterial.uniforms.mouse.value.set(mouse.x, mouse.y);
+        console.log("clicked", mouse.x, ",",  mouse.y);
+    }
+}
+
+// Render Loop
+function animate() {
+    requestAnimationFrame(animate);
+
+    // Swap render targets
+    let temp = renderTarget;
+    renderTarget = prevRenderTarget;
+    prevRenderTarget = temp;
+
+    // Update shader uniforms
+    shaderMaterial.uniforms.previousTexture.value = prevRenderTarget.texture;
+    shaderMaterial.uniforms.time.value += 0.02; // Time for brush texture animation
+
+    // Render to render target
+    renderer.setRenderTarget(renderTarget);
+    renderer.render(scene, camera);
+    renderer.setRenderTarget(null); // Render to screen
+}
+
+init();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Euler's Theorem, Polar Wave, and Dynamic Camera</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: 'Arial', sans-serif;
+    }
+    #first, #second, #third, #fourth {
+      position: absolute;
+    }
+    #first {
+      width: 50vw;
+      height: 50vh;
+      top: 0;
+      left: 0;
+      background: rgba(0, 0, 0, 0.1);
+    }
+    #second {
+      width: 100vw;
+      height: 100vh;
+      top: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.2);
+    }
+    #third {
+      width: 50vw;
+      height: 50vh;
+      bottom: 0;
+      left: 0;
+      background: rgba(0, 0, 0, 0.3);
+    }
+    #fourth {
+      width: 50vw;
+      height: 50vh;
+      bottom: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.4);
+    }
+    #controls {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    button {
+      margin: 5px;
+      padding: 10px 15px;
+      font-size: 14px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      background: #3399ff;
+      color: white;
+    }
+    button:hover {
+      background: #1d6dcc;
+    }
+    .equation {
+      font-size: 14px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div id="first"></div>
+  <div id="second"></div>
+  <div id="third"></div>
+  <div id="fourth"></div>
+  <div id="controls">
+    <button id="pauseEuler">Pause/Resume Euler Animation</button>
+    <button id="pauseWave">Pause/Resume Wave Animation</button>
+    <div class="equation">
+      <strong>Euler's Theorem:</strong> \( e^{i\theta} = \cos(\theta) + i\sin(\theta) \)
+    </div>
+    <div class="equation">
+      <strong>3D Polar Wave:</strong> \( z = \sin(\sqrt{x^2 + y^2} \cdot 2 + t) \cdot 0.5 \)
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    // First Shader (Euler's Theorem Animation)
+    const container1 = document.getElementById('first');
+    const scene1 = new THREE.Scene();
+    const camera1 = new THREE.PerspectiveCamera(75, container1.clientWidth / container1.clientHeight, 0.1, 1000);
+    const renderer1 = new THREE.WebGLRenderer();
+    renderer1.setSize(container1.clientWidth, container1.clientHeight);
+    container1.appendChild(renderer1.domElement);
+
+    const gridHelper1 = new THREE.GridHelper(10, 10, 0x888888, 0x444444);
+    gridHelper1.rotation.x = Math.PI / 2;
+    scene1.add(gridHelper1);
+
+    const circleGeometry = new THREE.CircleGeometry(1, 64);
+    const circleMaterial = new THREE.LineBasicMaterial({ color: 0x00ff00 });
+    const circle = new THREE.LineLoop(circleGeometry, circleMaterial);
+    circle.rotation.x = Math.PI / 2;
+    scene1.add(circle);
+
+    camera1.position.set(0, 5, 5);
+    camera1.lookAt(0, 0, 0);
+
+    let eulerRunning = true;
+
+    function animateFirst() {
+      renderer1.render(scene1, camera1);
+      if (eulerRunning) requestAnimationFrame(animateFirst);
+    }
+    animateFirst();
+
+    // Second Shader (Polar Wave Animation)
+    const container2 = document.getElementById('second');
+    const scene2 = new THREE.Scene();
+    const camera2 = new THREE.PerspectiveCamera(75, container2.clientWidth / container2.clientHeight, 0.1, 1000);
+    const renderer2 = new THREE.WebGLRenderer();
+    renderer2.setSize(container2.clientWidth, container2.clientHeight);
+    container2.appendChild(renderer2.domElement);
+
+    const waveGeometry2 = new THREE.PlaneGeometry(20, 20, 100, 100);
+    const waveMaterial2 = new THREE.MeshBasicMaterial({ color: 0x3399ff, wireframe: true });
+    const waveMesh2 = new THREE.Mesh(waveGeometry2, waveMaterial2);
+    waveMesh2.rotation.x = -Math.PI / 2;
+    scene2.add(waveMesh2);
+
+    let time2 = 0;
+
+    function animateSecond() {
+      time2 += 0.0005;
+      const position = waveGeometry2.attributes.position;
+      for (let i = 0; i < position.count; i++) {
+        const x = position.getX(i);
+        const y = position.getY(i);
+        const distance = Math.sqrt(x * x + y * y);
+        position.setZ(i, Math.sin(distance * 2 + time2) * 0.5);
+      }
+      position.needsUpdate = true;
+      renderer2.render(scene2, camera2);
+      requestAnimationFrame(animateSecond);
+    }
+    animateSecond();
+
+    // Third Shader (3D Polar Wave)
+    const container3 = document.getElementById('third');
+    const scene3 = new THREE.Scene();
+    const camera3 = new THREE.PerspectiveCamera(75, container3.clientWidth / container3.clientHeight, 0.1, 1000);
+    const renderer3 = new THREE.WebGLRenderer();
+    renderer3.setSize(container3.clientWidth, container3.clientHeight);
+    container3.appendChild(renderer3.domElement);
+
+    const waveGeometry3 = new THREE.PlaneGeometry(20, 20, 100, 100);
+    const waveMaterial3 = new THREE.MeshBasicMaterial({ color: 0xff6600, wireframe: true });
+    const waveMesh3 = new THREE.Mesh(waveGeometry3, waveMaterial3);
+    waveMesh3.rotation.x = -Math.PI / 4;
+    scene3.add(waveMesh3);
+
+    camera3.position.set(10, 10, 15);
+    camera3.lookAt(0, 0, 0);
+
+    function animateThird() {
+      renderer3.render(scene3, camera3);
+      requestAnimationFrame(animateThird);
+    }
+    animateThird();
+
+    // Fourth Shader (Dynamic Camera Floating Above Waves)
+    const container4 = document.getElementById('fourth');
+    const scene4 = new THREE.Scene();
+    const camera4 = new THREE.PerspectiveCamera(75, container4.clientWidth / container4.clientHeight, 0.1, 1000);
+    const renderer4 = new THREE.WebGLRenderer();
+    renderer4.setSize(container4.clientWidth, container4.clientHeight);
+    container4.appendChild(renderer4.domElement);
+
+    const waveGeometry4 = new THREE.PlaneGeometry(20, 20, 100, 100);
+    const waveMaterial4 = new THREE.MeshBasicMaterial({ color: 0xff6600, wireframe: true });
+    const waveMesh4 = new THREE.Mesh(waveGeometry4, waveMaterial4);
+    waveMesh4.rotation.x = -Math.PI / 2;
+    scene4.add(waveMesh4);
+
+    camera4.position.set(0, 3, 5);
+    let keys = {};
+
+    window.addEventListener('keydown', (e) => (keys[e.key] = true));
+    window.addEventListener('keyup', (e) => (keys[e.key] = false));
+
+    function updateCameraPosition() {
+      if (keys['ArrowUp']) camera4.position.z -= 0.1;
+      if (keys['ArrowDown']) camera4.position.z += 0.1;
+      if (keys['ArrowLeft']) camera4.position.x -= 0.1;
+      if (keys['ArrowRight']) camera4.position.x += 0.1;
+      camera4.lookAt(0, 0, 0);
+    }
+
+    function animateFourth() {
+      updateCameraPosition();
+      renderer4.render(scene4, camera4);
+      requestAnimationFrame(animateFourth);
+    }
+    animateFourth();
+
+    // Pause/Resume Button Logic
+    document.getElementById('pauseEuler').addEventListener('click', () => {
+      eulerRunning = !eulerRunning;
+      if (eulerRunning) animateFirst();
+    });
+
+    document.getElementById('pauseWave').addEventListener('click', () => {
+      time2 = time2 ? 0 : time2;
+    });
+  </script>
+</body>
+</html>
