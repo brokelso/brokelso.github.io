@@ -1,354 +1,136 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>WebGL Shader Filters Demo</title>
+  <meta charset="UTF-8">
+  <title>Three.js Simple Shader</title>
   <style>
     body {
       margin: 0;
-      font-family: sans-serif;
+      overflow: hidden;
     }
-    #glCanvas {
+    canvas {
       display: block;
-      margin: 0 auto;
-      background: #000;
-      border: 1px solid #ccc;
-    }
-    #controls {
-      width: 800px;
-      margin: 1rem auto;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-    #shaderCodeContainer {
-      display: flex;
-      flex-direction: column;
-      width: 800px;
-      margin: 0.5rem auto;
-    }
-    #fragmentShaderCode {
-      width: 100%;
-      height: 300px;
-      font-family: monospace;
-      white-space: pre;
     }
   </style>
 </head>
 <body>
-  <!-- Canvas for WebGL Rendering -->
-  <canvas id="glCanvas" width="800" height="600"></canvas>
-
-  <!-- Controls for choosing effect and reloading shader -->
-  <div id="controls">
-    <div>
-      <label for="effectSelect">Choose Effect: </label>
-      <select id="effectSelect">
-        <option value="0">Normal</option>
-        <option value="1">Black & White</option>
-        <option value="2">Blur</option>
-        <option value="3">Noise</option>
-        <option value="4">Halftone</option>
-      </select>
-      <button id="updateShaderBtn">Recompile Shader</button>
-    </div>
-  </div>
-
-  <!-- Fragment Shader Code Viewer/Editor -->
-  <div id="shaderCodeContainer">
-    <label for="fragmentShaderCode">Fragment Shader Code:</label>
-    <textarea id="fragmentShaderCode"></textarea>
-  </div>
-
-  <!-- Vertex Shader (inline in a script tag) -->
-  <script id="vertexShaderSource" type="x-shader/x-vertex">
-attribute vec4 a_position;
-attribute vec2 a_texCoord;
-
-varying vec2 v_texCoord;
-
-void main() {
-    gl_Position = a_position;
-    v_texCoord = a_texCoord;
-}
-  </script>
-
-  <!-- Default Fragment Shader (inline in a script tag).
-       This code will be placed into the textarea at runtime as well. -->
-  <script id="fragmentShaderSource" type="x-shader/x-fragment">
-precision mediump float;
-
-varying vec2 v_texCoord;
-uniform sampler2D u_image;
-uniform int u_effect;
-uniform vec2 u_resolution;
-
-// A small pseudo-random function for noise
-float rand(vec2 co){
-    return fract(sin(dot(co.xy, vec2(12.9898,78.233))) * 43758.5453);
-}
-
-void main() {
-    // Sample the original image color
-    vec4 color = texture2D(u_image, v_texCoord);
-
-    // Switch between different effect modes
-    if(u_effect == 1) {
-        // Black & White
-        float gray = (color.r + color.g + color.b) / 3.0;
-        color = vec4(vec3(gray), color.a);
-    } else if(u_effect == 2) {
-        // Simple 3x3 Box Blur
-        vec2 offset = 1.0 / u_resolution;
-        vec4 sum = vec4(0.0);
-
-        // Sample from 9 neighboring pixels (including center)
-        for(int i=-1; i<=1; i++){
-            for(int j=-1; j<=1; j++){
-                sum += texture2D(u_image, v_texCoord + vec2(float(i)*offset.x, float(j)*offset.y));
-            }
-        }
-        color = sum / 9.0;
-    } else if(u_effect == 3) {
-        // Noise
-        float n = rand(v_texCoord * u_resolution) - 0.5;
-        color.rgb += n * 0.1;  // adjust noise amplitude here
-    } else if(u_effect == 4) {
-        // Simple Halftone (dot pattern based on luminosity)
-        float gray = dot(color.rgb, vec3(0.299, 0.587, 0.114));
-        float scale = 10.0;    // how large each dot cell is
-        vec2 st = floor(v_texCoord * u_resolution / scale);
-        // Determine radius of the dot from the brightness
-        float radius = 0.5 * gray;
-        // Get local coordinate inside the cell: range [-0.5, 0.5]
-        vec2 cellCoord = fract(v_texCoord * (u_resolution / scale)) - 0.5;
-        float dist = length(cellCoord);
-        float dotMask = step(dist, radius);
-
-        // White on black or black on white? Let's do white dot on black:
-        color = vec4(vec3(dotMask), 1.0);
-    }
-
-    gl_FragColor = color;
-}
-  </script>
-
+  <!-- Include Three.js from a CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
   <script>
-    // Grab references to UI elements
-    const canvas = document.getElementById("glCanvas");
-    const effectSelect = document.getElementById("effectSelect");
-    const updateShaderBtn = document.getElementById("updateShaderBtn");
-    const fragmentShaderCodeTextarea = document.getElementById("fragmentShaderCode");
+    // -----------------------------
+    // 1. Basic scene setup
+    // -----------------------------
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(
+      75,                       // FOV
+      window.innerWidth / window.innerHeight, // Aspect ratio
+      0.1,                      // Near clipping
+      1000                      // Far clipping
+    );
+    camera.position.z = 2; // Place camera in front of plane
 
-    let gl;
-    let program;
-    let positionLocation, texCoordLocation;
-    let textureLocation, effectLocation, resolutionLocation;
-    let positionBuffer, texCoordBuffer;
-    let texture;
-    let imageLoaded = false;
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
 
-    // --------------------------------------------------
-    // 1. Initialize WebGL
-    // --------------------------------------------------
-    function initWebGL() {
-      gl = canvas.getContext("webgl");
-      if (!gl) {
-        alert("Your browser does not support WebGL.");
-        return;
+    // -----------------------------
+    // 2. Geometry (a simple plane)
+    // -----------------------------
+    const geometry = new THREE.PlaneGeometry(2, 2);
+
+    // -----------------------------
+    // 3. Load a texture (optional)
+    // -----------------------------
+    const texture = new THREE.TextureLoader().load("path/to/your/texture.jpg");
+    // Note: If loading from local file paths, ensure you're running an HTTP server,
+    // not just opening the file from your filesystem.
+
+    // -----------------------------
+    // 4. Define our uniforms
+    // -----------------------------
+    const uniforms = {
+      u_time:    { value: 0.0 },
+      u_texture: { value: texture }
+    };
+
+    // -----------------------------
+    // 5. Vertex Shader
+    // -----------------------------
+    const vertexShader = `
+      varying vec2 vUV;
+      void main() {
+        // Pass the UV coordinates to the fragment shader
+        vUV = uv;
+
+        // Standard transform for 3D vertices
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
       }
-      gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-    }
+    `;
 
-    // --------------------------------------------------
-    // 2. Compile Shader Function
-    // --------------------------------------------------
-    function compileShader(shaderSource, shaderType) {
-      const shader = gl.createShader(shaderType);
-      gl.shaderSource(shader, shaderSource);
-      gl.compileShader(shader);
+    // -----------------------------
+    // 6. Fragment Shader
+    // -----------------------------
+    const fragmentShader = `
+      precision mediump float;
 
-      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        console.error("Shader compile error:", gl.getShaderInfoLog(shader));
-        gl.deleteShader(shader);
-        return null;
+      uniform float u_time;
+      uniform sampler2D u_texture;
+      varying vec2 vUV;
+
+      void main() {
+        // Sample the texture
+        vec4 texColor = texture2D(u_texture, vUV);
+
+        // Create a simple oscillation [0..1] using sine
+        float wave = 0.5 + 0.5 * sin(u_time);
+
+        // Pick a color to blend with
+        vec4 colorShift = vec4(1.0, 0.0, 0.0, 1.0); // red
+
+        // Blend texture with the color shift over time
+        vec4 finalColor = mix(texColor, colorShift, wave);
+
+        gl_FragColor = finalColor;
       }
-      return shader;
-    }
+    `;
 
-    // --------------------------------------------------
-    // 3. Create Program
-    // --------------------------------------------------
-    function createProgram(vertexSrc, fragmentSrc) {
-      const vShader = compileShader(vertexSrc, gl.VERTEX_SHADER);
-      const fShader = compileShader(fragmentSrc, gl.FRAGMENT_SHADER);
-      if (!vShader || !fShader) return null;
-
-      const prog = gl.createProgram();
-      gl.attachShader(prog, vShader);
-      gl.attachShader(prog, fShader);
-      gl.linkProgram(prog);
-
-      if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
-        console.error("Program link error:", gl.getProgramInfoLog(prog));
-        return null;
-      }
-      return prog;
-    }
-
-    // --------------------------------------------------
-    // 4. Set up Buffers (Full-screen Quad)
-    // --------------------------------------------------
-    function initBuffers() {
-      // Create a buffer for the quad's positions (2 triangles)
-      positionBuffer = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-      // Covers the entire clip space (-1 to +1), two triangles
-      const positions = new Float32Array([
-        -1, -1,
-         1, -1,
-        -1,  1,
-        -1,  1,
-         1, -1,
-         1,  1,
-      ]);
-      gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
-
-      // Create a buffer for the quad's texture coordinates
-      texCoordBuffer = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
-      // Map corners (0,0) to (1,1)
-      const texCoords = new Float32Array([
-         0, 0,
-         1, 0,
-         0, 1,
-         0, 1,
-         1, 0,
-         1, 1,
-      ]);
-      gl.bufferData(gl.ARRAY_BUFFER, texCoords, gl.STATIC_DRAW);
-    }
-
-    // --------------------------------------------------
-    // 5. Load Texture (Ocean Image)
-    // --------------------------------------------------
-    function loadTexture(url) {
-      texture = gl.createTexture();
-      const img = new Image();
-      img.crossOrigin = ""; // If loading from another domain
-      img.src = url;
-      img.onload = function() {
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
-
-        // For non-power-of-2 images, use these settings
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-
-        imageLoaded = true;
-        render();
-      };
-    }
-
-    // --------------------------------------------------
-    // 6. Initialize & Compile Shaders, Get Locations
-    // --------------------------------------------------
-    function initProgram() {
-      // Get vertex/fragment shader source from script tags
-      const vertexSrc = document.getElementById("vertexShaderSource").textContent.trim();
-      // The fragmentSrc will come from the textarea (which is loaded initially from the script tag)
-      const fragmentSrc = fragmentShaderCodeTextarea.value;
-
-      program = createProgram(vertexSrc, fragmentSrc);
-      if (!program) {
-        alert("Error creating shader program. Check console for details.");
-        return;
-      }
-      gl.useProgram(program);
-
-      // Look up attribute locations
-      positionLocation = gl.getAttribLocation(program, "a_position");
-      texCoordLocation = gl.getAttribLocation(program, "a_texCoord");
-
-      // Look up uniform locations
-      textureLocation = gl.getUniformLocation(program, "u_image");
-      effectLocation = gl.getUniformLocation(program, "u_effect");
-      resolutionLocation = gl.getUniformLocation(program, "u_resolution");
-    }
-
-    // --------------------------------------------------
-    // 7. Draw
-    // --------------------------------------------------
-    function render() {
-      if (!imageLoaded) return;
-
-      gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-      gl.clearColor(0.0, 0.0, 0.0, 1.0);
-      gl.clear(gl.COLOR_BUFFER_BIT);
-
-      // Use the compiled program
-      gl.useProgram(program);
-
-      // Enable position buffer
-      gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-      gl.enableVertexAttribArray(positionLocation);
-      gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
-
-      // Enable texCoord buffer
-      gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
-      gl.enableVertexAttribArray(texCoordLocation);
-      gl.vertexAttribPointer(texCoordLocation, 2, gl.FLOAT, false, 0, 0);
-
-      // Set texture uniform
-      gl.activeTexture(gl.TEXTURE0);
-      gl.bindTexture(gl.TEXTURE_2D, texture);
-      gl.uniform1i(textureLocation, 0);
-
-      // Set effect uniform
-      const effectValue = parseInt(effectSelect.value);
-      gl.uniform1i(effectLocation, effectValue);
-
-      // Set resolution uniform
-      gl.uniform2f(resolutionLocation, gl.drawingBufferWidth, gl.drawingBufferHeight);
-
-      // Draw the triangles
-      gl.drawArrays(gl.TRIANGLES, 0, 6);
-    }
-
-    // --------------------------------------------------
-    // 8. Init everything on page load
-    // --------------------------------------------------
-    function main() {
-      initWebGL();
-      initBuffers();
-
-      // Put the default fragment shader source into the textarea
-      const defaultFragmentShaderSrc = document
-          .getElementById("fragmentShaderSource")
-          .textContent.trim();
-      fragmentShaderCodeTextarea.value = defaultFragmentShaderSrc;
-
-      // Create and use the program the first time
-      initProgram();
-
-      // Load the texture (replace ocean.jpg with a valid URL to your ocean image)
-      loadTexture("ocean2.jpeg");
-    }
-
-    // Recompile the shader when the user clicks "Recompile Shader"
-    updateShaderBtn.addEventListener("click", () => {
-      initProgram();
-      render();
+    // -----------------------------
+    // 7. Create a ShaderMaterial
+    // -----------------------------
+    const material = new THREE.ShaderMaterial({
+      vertexShader:   vertexShader,
+      fragmentShader: fragmentShader,
+      uniforms:       uniforms
     });
 
-    // Update effect live when changing the dropdown
-    effectSelect.addEventListener("change", () => {
-      render();
-    });
+    // -----------------------------
+    // 8. Mesh + Add to Scene
+    // -----------------------------
+    const mesh = new THREE.Mesh(geometry, material);
+    scene.add(mesh);
 
-    window.onload = main;
+    // -----------------------------
+    // 9. Animation Loop
+    // -----------------------------
+    function animate(time) {
+      requestAnimationFrame(animate);
+
+      // Update time uniform (convert to seconds)
+      uniforms.u_time.value = time * 0.001;
+
+      // Render the scene from the perspective of the camera
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // -----------------------------
+    // 10. Handle Window Resize
+    // -----------------------------
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
   </script>
 </body>
 </html>
