@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Accessible HTML Example</title>
+  <style>
+    /* Basic styling for demonstration, feel free to modify or remove */
+    *, *:before, *:after {
+    box-sizing: border-box;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+      background-color: rgb(158, 209, 233);
+    }
+    header, footer {
+      background-color: #f2f2f2;
+      padding: 1em;
+    }
+    nav ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    nav li {
+      display: inline;
+      margin-right: 1em;
+    }
+    .skip-to-content {
+      position: absolute;
+      left: -9999px;
+      top: auto;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+    .skip-to-content:focus {
+      position: static;
+      width: auto;
+      height: auto;
+    }
+    /* main {
+      padding: 1em; 
+    } */
+    .main-section {
+      padding: 10px;
+      margin-bottom: 2em;
+      background-color: white;
+      border: 2px solid;
+      border-color: rgb(63, 63, 111);
+      z-index: 1;
+      
+    }
+    h2 {
+      margin-top: 0;
+    }
+
+    #section2 {
+      /* display: inline; */
+      width: 50%;
+      bottom: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.4);
+    }
+
+    #section3 {
+      /* display: block;  */
+      width: 40%;
+      justify-content: right;
+      margin-left: 55%;
+      bottom: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.4);
+    }
+
+
+    #section7 {
+      z-index: 0;
+      padding: 0em;
+      width: 50wh;
+      height: 100vh;
+      bottom: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.4);
+    }
+
+
+    #glCanvas {
+      display: block;
+      margin: 0 auto;
+      background: #000;
+      border: 1px solid #ccc;
+    }
+    #controls {
+      width: 800px;
+      margin: 1rem auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    #shaderCodeContainer {
+      display: flex;
+      flex-direction: column;
+      width: 800px;
+      margin: 0.5rem auto;
+    }
+    #fragmentShaderCode {
+      width: 100%;
+      height: 300px;
+      font-family: monospace;
+      white-space: pre;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Skip link for improved accessibility -->
+  <a href="#main-content" class="skip-to-content">Skip to main content</a>
+
+  <header>
+    <h1>GPU Shaders as Metaphors for and Materializeers of Experience</h1>
+    <nav aria-label="Main navigation">
+      <ul>
+        <li><a href="#section1-title">Defining Shaders</a></li>
+        <li><a href="#section2-title">Wendy Chun</a></li>
+        <li><a href="#section3-title">Vilélm Flusser</a></li>
+        <li><a href="#section4-title">Media Archaeological Practice</a></li>
+        <li><a href="#section5-title">Vectors</a></li>
+        <li><a href="#section6-title">Trigonometric Functions</a></li>
+        <li><a href="#section7-title">Examples</a></li>
+        <li><a href="#section8-title">Fourier</a></li>
+        <li><a href="#section9-title">Filters</a></li>
+        <li><a href="#section10-title">References</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main id="main-content">
+
+    <section class="main-section" id="section1" aria-labelledby="section1-title">
+      <h2 id="section1-title">Defining Shaders:</h2>
+      <p>"Shaders" instruct a computer's graphics processing unit (GPU) to calculate color, light, texture, and the illusion of depth in 3D environments. Programming languages include OpenGL Shading Language (GLSL) and High Level Shader Languae (HLSL) </p>
+    </section>
+
+    <section class="main-section" id="section2" aria-labelledby="section2-title">
+      <h2 id="section2-title"></h2>
+      <p>
+                Programmers, computer scientists, and critical theorists have reduced software to
+        a recipe, a set of instructions, substituting space/text for time/process. The current
+        common-sense defi nition of software as a “ set of instructions that direct a computer
+        to do a specifi c task ” and the OED defi nition of software as “ the programs and procedures
+        required to enable a computer to perform a specifi c task, as opposed to the
+        physical components of the system ” both posit software as cause, as what drives computation...
+        Code does not always or automatically do what it says, but it does so in a crafty, speculative manner in which
+        meaning and action are both created. It carries with it the possibility of deviousness:
+        our belief that compilers simply expand higher-level commands — rather than alter or
+        insert other behaviors — is simply that, a belief, one of the many that sustain computing
+        as such. This belief glosses over the fact that source code only becomes a source after
+        the fact . Execution, and a whole series of executions, belatedly makes some piece of
+        code a source, which is again why source code, among other things, was initially called
+        pseudocode.
+        Source code is more accurately a re-source , rather than a source. (24)
+
+        As Metaphor: ""
+        As Materializer"
+      </p>
+      <p>Wendy Chun quote</p>
+    </section>
+
+    <section class="main-section" id="section3" aria-labelledby="section3-title">
+      <h2 id="section3-title">Vilém Flusser</h2>
+      <p>Technical images:</p>
+    </section>
+
+    <section class="main-section" id="section4" aria-labelledby="section4-title">
+      <h2 id="section4-title">Media Archaeological Practices</h2>
+      <p>Offer examples or case studies to illustrate your points.</p>
+    </section>
+
+    <section class="main-section" id="section5" aria-labelledby="section5-title">
+      <h2 id="section5-title">Vectors</h2>
+      <p>Format of vectors</p>
+    </section>
+
+    <section class="main-section" id="section6" aria-labelledby="section6-title">
+      <h2 id="section6-title">Trigonometric Functions</h2>
+      <p>How do mathematical repesentations of oscillation assume a regularized change?</p>
+    </section>
+
+    <section class="main-section" id="section7" aria-labelledby="section7-title">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+        <script>
+        const container4 = document.getElementById('section7');
+        const scene4 = new THREE.Scene();
+        const camera4 = new THREE.PerspectiveCamera(75, container4.clientWidth / container4.clientHeight, 0.1, 1000);
+        const renderer4 = new THREE.WebGLRenderer();
+        renderer4.setSize(container4.clientWidth, container4.clientHeight);
+        container4.appendChild(renderer4.domElement);
+    
+        const waveGeometry4 = new THREE.PlaneGeometry(20, 20, 100, 100);
+        const waveMaterial4 = new THREE.MeshBasicMaterial({ color: 0xff6600, wireframe: true });
+        const waveMesh4 = new THREE.Mesh(waveGeometry4, waveMaterial4);
+        waveMesh4.rotation.x = -Math.PI / 2;
+        scene4.add(waveMesh4);
+    
+        camera4.position.set(0, 3, 5);
+        let keys = {};
+    
+        window.addEventListener('keydown', (e) => (keys[e.key] = true));
+        window.addEventListener('keyup', (e) => (keys[e.key] = false));
+    
+        function updateCameraPosition() {
+          if (keys['ArrowUp']) camera4.position.z -= 0.1;
+          if (keys['ArrowDown']) camera4.position.z += 0.1;
+          if (keys['ArrowLeft']) camera4.position.x -= 0.1;
+          if (keys['ArrowRight']) camera4.position.x += 0.1;
+          camera4.lookAt(0, 0, 0);
+        }
+    
+        function animateFourth() {
+          updateCameraPosition();
+          renderer4.render(scene4, camera4);
+          requestAnimationFrame(animateFourth);
+        }
+        animateFourth();
+    </script>
+    </section>
+    <section class="main-section" id="section8" aria-labelledby="section7-title">
+        <h2 id="section6-title">Fourier</h2>
+    </section>
+    <section class="main-section" id="section9" aria-labelledby="section7-title">
+        <h2 id="section6-title">Filters</h2>
+        <canvas id="glCanvas" width="800" height="600"></canvas>
+
+  <!-- Controls for choosing effect and reloading shader -->
+  <div id="controls">
+    <div>
+      <label for="effectSelect">Choose Effect: </label>
+      <select id="effectSelect">
+        <option value="0">Normal</option>
+        <option value="1">Black & White</option>
+        <option value="2">Blur</option>
+        <option value="3">Noise</option>
+        <option value="4">Halftone</option>
+      </select>
+      <button id="updateShaderBtn">Recompile Shader</button>
+    </div>
+  </div>
+
+  <!-- Fragment Shader Code Viewer/Editor -->
+  <div id="shaderCodeContainer">
+    <label for="fragmentShaderCode">Fragment Shader Code:</label>
+    <textarea id="fragmentShaderCode"></textarea>
+  </div>
+
+  <!-- Vertex Shader (inline in a script tag) -->
+  <script id="vertexShaderSource" type="x-shader/x-vertex">
+attribute vec4 a_position;
+attribute vec2 a_texCoord;
+
+varying vec2 v_texCoord;
+
+void main() {
+    gl_Position = a_position;
+    v_texCoord = a_texCoord;
+}
+  </script>
+
+  <!-- Default Fragment Shader (inline in a script tag).
+       This code will be placed into the textarea at runtime as well. -->
+  <script id="fragmentShaderSource" type="x-shader/x-fragment">
+precision mediump float;
+
+varying vec2 v_texCoord;
+uniform sampler2D u_image;
+uniform int u_effect;
+uniform vec2 u_resolution;
+
+// A small pseudo-random function for noise
+float rand(vec2 co){
+    return fract(sin(dot(co.xy, vec2(12.9898,78.233))) * 43758.5453);
+}
+
+void main() {
+    // Sample the original image color
+    vec4 color = texture2D(u_image, v_texCoord);
+
+    // Switch between different effect modes
+    if(u_effect == 1) {
+        // Black & White
+        float gray = (color.r + color.g + color.b) / 3.0;
+        color = vec4(vec3(gray), color.a);
+    } else if(u_effect == 2) {
+        // Simple 3x3 Box Blur
+        vec2 offset = 1.0 / u_resolution;
+        vec4 sum = vec4(0.0);
+
+        // Sample from 9 neighboring pixels (including center)
+        for(int i=-1; i<=1; i++){
+            for(int j=-1; j<=1; j++){
+                sum += texture2D(u_image, v_texCoord + vec2(float(i)*offset.x, float(j)*offset.y));
+            }
+        }
+        color = sum / 9.0;
+    } else if(u_effect == 3) {
+        // Noise
+        float n = rand(v_texCoord * u_resolution) - 0.5;
+        color.rgb += n * 0.1;  // adjust noise amplitude here
+    } else if(u_effect == 4) {
+        // Simple Halftone (dot pattern based on luminosity)
+        float gray = dot(color.rgb, vec3(0.299, 0.587, 0.114));
+        float scale = 10.0;    // how large each dot cell is
+        vec2 st = floor(v_texCoord * u_resolution / scale);
+        // Determine radius of the dot from the brightness
+        float radius = 0.5 * gray;
+        // Get local coordinate inside the cell: range [-0.5, 0.5]
+        vec2 cellCoord = fract(v_texCoord * (u_resolution / scale)) - 0.5;
+        float dist = length(cellCoord);
+        float dotMask = step(dist, radius);
+
+        // White on black or black on white? Let's do white dot on black:
+        color = vec4(vec3(dotMask), 1.0);
+    }
+
+    gl_FragColor = color;
+}
+  </script>
+
+  <script>
+    // Grab references to UI elements
+    const canvas = document.getElementById("glCanvas");
+    const effectSelect = document.getElementById("effectSelect");
+    const updateShaderBtn = document.getElementById("updateShaderBtn");
+    const fragmentShaderCodeTextarea = document.getElementById("fragmentShaderCode");
+
+    let gl;
+    let program;
+    let positionLocation, texCoordLocation;
+    let textureLocation, effectLocation, resolutionLocation;
+    let positionBuffer, texCoordBuffer;
+    let texture;
+    let imageLoaded = false;
+
+    // --------------------------------------------------
+    // 1. Initialize WebGL
+    // --------------------------------------------------
+    function initWebGL() {
+      gl = canvas.getContext("webgl");
+      if (!gl) {
+        alert("Your browser does not support WebGL.");
+        return;
+      }
+      gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+    }
+
+    // --------------------------------------------------
+    // 2. Compile Shader Function
+    // --------------------------------------------------
+    function compileShader(shaderSource, shaderType) {
+      const shader = gl.createShader(shaderType);
+      gl.shaderSource(shader, shaderSource);
+      gl.compileShader(shader);
+
+      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        console.error("Shader compile error:", gl.getShaderInfoLog(shader));
+        gl.deleteShader(shader);
+        return null;
+      }
+      return shader;
+    }
+
+    // --------------------------------------------------
+    // 3. Create Program
+    // --------------------------------------------------
+    function createProgram(vertexSrc, fragmentSrc) {
+      const vShader = compileShader(vertexSrc, gl.VERTEX_SHADER);
+      const fShader = compileShader(fragmentSrc, gl.FRAGMENT_SHADER);
+      if (!vShader || !fShader) return null;
+
+      const prog = gl.createProgram();
+      gl.attachShader(prog, vShader);
+      gl.attachShader(prog, fShader);
+      gl.linkProgram(prog);
+
+      if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+        console.error("Program link error:", gl.getProgramInfoLog(prog));
+        return null;
+      }
+      return prog;
+    }
+
+    // --------------------------------------------------
+    // 4. Set up Buffers (Full-screen Quad)
+    // --------------------------------------------------
+    function initBuffers() {
+      // Create a buffer for the quad's positions (2 triangles)
+      positionBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+      // Covers the entire clip space (-1 to +1), two triangles
+      const positions = new Float32Array([
+        -1, -1,
+         1, -1,
+        -1,  1,
+        -1,  1,
+         1, -1,
+         1,  1,
+      ]);
+      gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+
+      // Create a buffer for the quad's texture coordinates
+      texCoordBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
+      // Map corners (0,0) to (1,1)
+      const texCoords = new Float32Array([
+         0, 0,
+         1, 0,
+         0, 1,
+         0, 1,
+         1, 0,
+         1, 1,
+      ]);
+      gl.bufferData(gl.ARRAY_BUFFER, texCoords, gl.STATIC_DRAW);
+    }
+
+    // --------------------------------------------------
+    // 5. Load Texture (Ocean Image)
+    // --------------------------------------------------
+    function loadTexture(url) {
+      texture = gl.createTexture();
+      const img = new Image();
+      img.crossOrigin = ""; // If loading from another domain
+      img.src = url;
+      img.onload = function() {
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+
+        // For non-power-of-2 images, use these settings
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+        imageLoaded = true;
+        render();
+      };
+    }
+
+    // --------------------------------------------------
+    // 6. Initialize & Compile Shaders, Get Locations
+    // --------------------------------------------------
+    function initProgram() {
+      // Get vertex/fragment shader source from script tags
+      const vertexSrc = document.getElementById("vertexShaderSource").textContent.trim();
+      // The fragmentSrc will come from the textarea (which is loaded initially from the script tag)
+      const fragmentSrc = fragmentShaderCodeTextarea.value;
+
+      program = createProgram(vertexSrc, fragmentSrc);
+      if (!program) {
+        alert("Error creating shader program. Check console for details.");
+        return;
+      }
+      gl.useProgram(program);
+
+      // Look up attribute locations
+      positionLocation = gl.getAttribLocation(program, "a_position");
+      texCoordLocation = gl.getAttribLocation(program, "a_texCoord");
+
+      // Look up uniform locations
+      textureLocation = gl.getUniformLocation(program, "u_image");
+      effectLocation = gl.getUniformLocation(program, "u_effect");
+      resolutionLocation = gl.getUniformLocation(program, "u_resolution");
+    }
+
+    // --------------------------------------------------
+    // 7. Draw
+    // --------------------------------------------------
+    function render() {
+      if (!imageLoaded) return;
+
+      gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+      gl.clearColor(0.0, 0.0, 0.0, 1.0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+
+      // Use the compiled program
+      gl.useProgram(program);
+
+      // Enable position buffer
+      gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+      gl.enableVertexAttribArray(positionLocation);
+      gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+      // Enable texCoord buffer
+      gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
+      gl.enableVertexAttribArray(texCoordLocation);
+      gl.vertexAttribPointer(texCoordLocation, 2, gl.FLOAT, false, 0, 0);
+
+      // Set texture uniform
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+      gl.uniform1i(textureLocation, 0);
+
+      // Set effect uniform
+      const effectValue = parseInt(effectSelect.value);
+      gl.uniform1i(effectLocation, effectValue);
+
+      // Set resolution uniform
+      gl.uniform2f(resolutionLocation, gl.drawingBufferWidth, gl.drawingBufferHeight);
+
+      // Draw the triangles
+      gl.drawArrays(gl.TRIANGLES, 0, 6);
+    }
+
+    // --------------------------------------------------
+    // 8. Init everything on page load
+    // --------------------------------------------------
+    function main() {
+      initWebGL();
+      initBuffers();
+
+      // Put the default fragment shader source into the textarea
+      const defaultFragmentShaderSrc = document
+          .getElementById("fragmentShaderSource")
+          .textContent.trim();
+      fragmentShaderCodeTextarea.value = defaultFragmentShaderSrc;
+
+      // Create and use the program the first time
+      initProgram();
+
+      // Load the texture (replace ocean.jpg with a valid URL to your ocean image)
+      loadTexture("ocean2.jpeg");
+    }
+
+    // Recompile the shader when the user clicks "Recompile Shader"
+    updateShaderBtn.addEventListener("click", () => {
+      initProgram();
+      render();
+    });
+
+    // Update effect live when changing the dropdown
+    effectSelect.addEventListener("change", () => {
+      render();
+    });
+
+    window.onload = main;
+  </script>
+    </section>
+    
+    <section class="main-section" id="section10" aria-labelledby="section10-title">
+    References<br>
+    https://thebookofshaders.com/
+    </section>
+
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Kelsey Brod</p>
+  </footer>
+
+</body>
+</html>

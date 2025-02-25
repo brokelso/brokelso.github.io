@@ -1,134 +1,294 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painterly Shader with Three.js</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <style>
-        body { margin: 0; overflow: hidden; }
-        canvas { display: block; }
-    </style>
+  <meta charset="UTF-8" />
+  <title>Painterly Brush with UI</title>
+  <style>
+    body { margin: 0; overflow: hidden; }
+    canvas { display: block; }
+
+    /* Simple floating UI panel */
+    #ui {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(255, 255, 255, 0.85);
+      padding: 10px;
+      border-radius: 5px;
+      width:35%;
+      max-width: 800px;
+      font-family: sans-serif;
+      font-size: 14px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 200px;
+      font-family: monospace;
+      font-size: 12px;
+    }
+
+    .label {
+      margin-top: 8px;
+      font-weight: bold;
+      display: inline-block;
+      margin-bottom: 4px;
+    }
+
+    .slider-row {
+      margin-bottom: 10px;
+    }
+  </style>
 </head>
 <body>
 
-<script>
-let scene, camera, renderer;
-let renderTarget, prevRenderTarget, shaderMaterial;
+<div id="ui">
+  <h2>Painterly Brush Editor</h2>
+
+  <!-- Brush Size Slider -->
+  <div class="slider-row">
+    <div class="label">Brush Size</div><br/>
+    <input id="brushSizeSlider" type="range" min="0.001" max="0.1" step="0.001" value="0.03">
+  </div>
+
+  <!-- Color Picker -->
+  <div class="slider-row">
+    <div class="label">Brush Color</div><br/>
+    <input id="brushColorPicker" type="color" value="#3333ff" />
+  </div>
+
+  <!-- Noise Scale Slider -->
+  <div class="slider-row">
+    <div class="label">Noise Scale</div><br/>
+    <input id="noiseScaleSlider" type="range" min="1" max="500" step="1" value="200">
+  </div>
+
+  <!-- Fragment Shader Editor -->
+  <div class="label">Fragment Shader</div><br/>
+  <textarea id="shaderCode"></textarea><br/>
+  <button id="compileBtn">Compile Shader</button>
+  <div id="error" style="color:red; min-height: 1em; margin-top: 5px;"></div>
+</div>
+
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.153.0/build/three.module.js';
+
+let renderer, quadCamera, quadScene, quadMesh;
+let rtA, rtB;
 let mouse = new THREE.Vector2(-1, -1);
 let isDrawing = false;
 
-// Initialize Three.js Scene
-function init() {
-    scene = new THREE.Scene();
-    camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-    
-    renderer = new THREE.WebGLRenderer();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
+// Store references to our uniform values for easy updating:
+let uPrevTexture, uBrushRadius, uIsDrawing, uMouse;
+let uBrushColor, uNoiseScale;
 
-    // Create Render Targets for Persistent Drawing
-    renderTarget = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight);
-    prevRenderTarget = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight);
+// Default fragment shader source:
+const defaultFragmentShader = `
+// We'll interpolate vUV from the vertex shader
+varying vec2 vUV;
 
-    // Shader Material for Painting Effect
-    shaderMaterial = new THREE.ShaderMaterial({
-        uniforms: {
-            previousTexture: { value: prevRenderTarget.texture },
-            mouse: { value: new THREE.Vector2(-1, -1) },
-            resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
-            brushColor: { value: new THREE.Color(1, 0.5, 1) }, // Painterly color
-            time: { value: 0.0 }
-        },
-        vertexShader: `
-            varying vec2 vUv;
-            void main() {
-                vUv = uv;
-                gl_Position = vec4(position, 1.0);
-            }
-        `,
-        fragmentShader: `
-            uniform sampler2D previousTexture;
-            uniform vec2 mouse;
-            uniform vec2 resolution;
-            uniform vec3 brushColor;
-            uniform float time;
-            varying vec2 vUv;
+// Uniforms from JavaScript
+uniform sampler2D uPrevTexture; // The previously rendered texture
+uniform vec2 uMouse;           // Current mouse position (0..1)
+uniform bool uIsDrawing;
+uniform float uBrushRadius;
+uniform vec3 uBrushColor;
+uniform float uNoiseScale;
 
-            // Random noise function for painterly texture
-            float random(vec2 p) {
-                return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
-            }
-
-            // Painterly brush effect
-            float brushEffect(vec2 uv, vec2 mousePos) {
-                float dist = distance(uv, mousePos);
-                float brush = smoothstep(0.08, 0.02, dist); // Brush softness
-                brush *= 0.5 + 0.5 * sin(time + random(uv) * 5.0); // Add variation
-                return brush;
-            }
-
-            void main() {
-                vec4 prevColor = texture2D(previousTexture, vUv);
-                
-                // Convert mouse position to UV space
-                vec2 mouseUV = mouse / resolution;
-                mouseUV.y = 1.0 - mouseUV.y;
-
-                float brush = brushEffect(vUv, mouseUV);
-
-                // Mix old strokes with new ones for blending
-                vec3 color = mix(prevColor.rgb, brushColor, brush);
-
-                gl_FragColor = vec4(color, 1.0);
-            }
-        `
-    });
-
-    // Full-Screen Quad to Render Shader
-    let geometry = new THREE.PlaneGeometry(2, 2);
-    let quad = new THREE.Mesh(geometry, shaderMaterial);
-    scene.add(quad);
-
-    // Event Listeners for Mouse Input
-    window.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("mousedown", () => isDrawing = true);
-    window.addEventListener("mouseup", () => isDrawing = false);
-
-    animate();
+// A little random / noise function
+float random(vec2 st) {
+    return fract(sin(dot(st, vec2(12.9898, 78.233))) * 43758.5453123);
 }
 
-// Handle Mouse Movement & Update Shader
-function onMouseMove(event) {
-    if (isDrawing) {
-        mouse.x = event.clientX;
-        mouse.y = event.clientY;
-        shaderMaterial.uniforms.mouse.value.set(mouse.x, mouse.y);
-        console.log("clicked", mouse.x, ",",  mouse.y);
+void main() {
+  // Start with the previous frame's color
+  vec4 baseColor = texture2D(uPrevTexture, vUV);
+
+  if (uIsDrawing) {
+    float dist = distance(vUV, uMouse);
+    if (dist < uBrushRadius) {
+      float strength = 1.0 - smoothstep(0.0, uBrushRadius, dist);
+
+      // Add some noise to make it look painterly
+      float noiseVal = random(vUV * uNoiseScale);
+
+      // We offset the brush color by the noise
+      vec3 noisyBrush = uBrushColor + 0.2 * (noiseVal - 0.5);
+
+      // Blend into our base color
+      baseColor.rgb = mix(baseColor.rgb, noisyBrush, strength);
     }
+  }
+  
+  // Write out final color (opaque)
+  gl_FragColor = vec4(baseColor.rgb, 1.0);
+}
+`;
+
+// Basic vertex shader (draw a full-screen quad)
+const vertexShader = `
+varying vec2 vUV;
+void main() {
+  vUV = uv;
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}
+`;
+
+function init() {
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
+
+  // Orthographic camera that covers the entire screen
+  quadCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+  quadScene = new THREE.Scene();
+
+  // Setup ping-pong render targets
+  rtA = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight);
+  rtB = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight);
+
+  // Create the initial ShaderMaterial
+  const material = makeShaderMaterial(defaultFragmentShader);
+
+  // Create a full-screen quad
+  const geometry = new THREE.PlaneGeometry(2, 2);
+  quadMesh = new THREE.Mesh(geometry, material);
+  quadScene.add(quadMesh);
+
+  // Clear both RTs to white at start
+  clearRenderTarget(rtA, 0xffffff);
+  clearRenderTarget(rtB, 0xffffff);
+
+  // Mouse / Touch Events
+  window.addEventListener('mousedown', () => { isDrawing = true; });
+  window.addEventListener('mouseup', () => { isDrawing = false; });
+  window.addEventListener('mousemove', onMouseMove);
+
+  window.addEventListener('resize', onWindowResize);
+
+  // Setup UI
+  setupUI();
+
+  // Start animation
+  animate();
 }
 
-// Render Loop
+function makeShaderMaterial(fragShaderSource) {
+  // Create a new ShaderMaterial, storing references to the uniforms
+  const material = new THREE.ShaderMaterial({
+    vertexShader,
+    fragmentShader: fragShaderSource,
+    uniforms: {
+      uPrevTexture: { value: rtA.texture },
+      uMouse:       { value: new THREE.Vector2(-1, -1) },
+      uIsDrawing:   { value: false },
+      uBrushRadius: { value: parseFloat(document.getElementById('brushSizeSlider').value) },
+      uBrushColor:  { value: new THREE.Color(document.getElementById('brushColorPicker').value) },
+      uNoiseScale:  { value: parseFloat(document.getElementById('noiseScaleSlider').value) }
+    }
+  });
+
+  // Cache the uniform references so we can update them later
+  uPrevTexture  = material.uniforms.uPrevTexture;
+  uMouse        = material.uniforms.uMouse;
+  uIsDrawing    = material.uniforms.uIsDrawing;
+  uBrushRadius  = material.uniforms.uBrushRadius;
+  uBrushColor   = material.uniforms.uBrushColor;
+  uNoiseScale   = material.uniforms.uNoiseScale;
+
+  return material;
+}
+
+function clearRenderTarget(rt, color) {
+  renderer.setRenderTarget(rt);
+  renderer.setClearColor(color, 1);
+  renderer.clear(true, true, true);
+  renderer.setRenderTarget(null);
+}
+
+function onMouseMove(e) {
+  const x = e.clientX / window.innerWidth;
+  const y = 1.0 - (e.clientY / window.innerHeight);
+  mouse.set(x, y);
+}
+
+function onWindowResize() {
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  rtA.setSize(window.innerWidth, window.innerHeight);
+  rtB.setSize(window.innerWidth, window.innerHeight);
+
+  // Optionally clear them again if you'd like
+  clearRenderTarget(rtA, 0xffffff);
+  clearRenderTarget(rtB, 0xffffff);
+}
+
 function animate() {
-    requestAnimationFrame(animate);
+  requestAnimationFrame(animate);
 
-    // Swap render targets
-    let temp = renderTarget;
-    renderTarget = prevRenderTarget;
-    prevRenderTarget = temp;
+  // Update uniforms
+  uMouse.value.copy(mouse);
+  uIsDrawing.value = isDrawing;
 
-    // Update shader uniforms
-    shaderMaterial.uniforms.previousTexture.value = prevRenderTarget.texture;
-    shaderMaterial.uniforms.time.value += 0.02; // Time for brush texture animation
+  // Render from rtA -> rtB
+  uPrevTexture.value = rtA.texture;
+  renderer.setRenderTarget(rtB);
+  renderer.render(quadScene, quadCamera);
 
-    // Render to render target
-    renderer.setRenderTarget(renderTarget);
-    renderer.render(scene, camera);
-    renderer.setRenderTarget(null); // Render to screen
+  // Swap
+  const tmp = rtA;
+  rtA = rtB;
+  rtB = tmp;
+
+  // Render final to screen
+  uPrevTexture.value = rtA.texture;
+  renderer.setRenderTarget(null);
+  renderer.render(quadScene, quadCamera);
 }
 
+function setupUI() {
+  // Put the default shader code in the text area
+  const shaderTextarea = document.getElementById('shaderCode');
+  shaderTextarea.value = defaultFragmentShader;
+
+  // Brush size
+  document.getElementById('brushSizeSlider').addEventListener('input', (e) => {
+    uBrushRadius.value = parseFloat(e.target.value);
+  });
+
+  // Brush color
+  document.getElementById('brushColorPicker').addEventListener('input', (e) => {
+    uBrushColor.value.set(e.target.value);
+  });
+
+  // Noise scale
+  document.getElementById('noiseScaleSlider').addEventListener('input', (e) => {
+    uNoiseScale.value = parseFloat(e.target.value);
+  });
+
+  // Compile button
+  document.getElementById('compileBtn').addEventListener('click', () => {
+    const fragSource = shaderTextarea.value;
+    const errorDiv   = document.getElementById('error');
+    errorDiv.textContent = '';
+
+    try {
+      // Create a new ShaderMaterial with the user-provided code
+      const newMaterial = makeShaderMaterial(fragSource);
+
+      // Swap into the quadMesh
+      quadMesh.material = newMaterial;
+      quadMesh.material.needsUpdate = true;
+
+    } catch (err) {
+      // In practice, the compilation error might only appear in the console,
+      // but we can at least display a message here:
+      errorDiv.textContent = `Shader compile error: ${err}`;
+    }
+  });
+}
+
+// Kick off everything
 init();
 </script>
-
 </body>
 </html>

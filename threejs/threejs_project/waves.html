@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Sampling Theorem & Fourier Frequencies (Shader + Three.js)</title>
+  <style>
+    body { margin: 0; overflow: hidden; }
+    #info {
+      position: absolute; top: 0; left: 0;
+      background: rgba(255,255,255,0.8);
+      padding: 8px; margin: 8px;
+      max-width: 400px;
+      font-family: sans-serif;
+      font-size: 14px;
+      line-height: 1.4em;
+    }
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+<div id="info">
+  <h3>Sampling Theorem Demo</h3>
+  <p>
+    This demo shows a continuous sinusoidal wave (red) and its sampled representation (blue). 
+    Each sample is drawn as a dot at the point where the signal is measured, plus a vertical line down to the x-axis. 
+    Move the sliders below to adjust:
+  </p>
+  <ul>
+    <li><strong>Wave Frequency</strong> &mdash; The sinusoid’s frequency (in “cycles” per unit X).</li>
+    <li><strong>Sampling Frequency</strong> &mdash; How many samples per unit X are taken. 
+      To avoid aliasing, it should be at least <em>twice</em> the wave frequency.</li>
+    <li><strong>Wave Amplitude</strong> &mdash; The amplitude of the sinusoidal wave.</li>
+    <li><strong>Line Width</strong> &mdash; Thickness of the lines for axes, wave, and samples.</li>
+  </ul>
+  <p>
+    If the wave frequency exceeds half of the sampling frequency, you’ll observe aliasing, where 
+    the sampled data does not faithfully reconstruct the original wave. This demonstrates 
+    the <em>Nyquist–Shannon sampling theorem</em>.
+  </p>
+</div>
+
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.153.0/build/three.module.js';
+import { GUI } from 'https://cdn.jsdelivr.net/npm/lil-gui@latest/dist/lil-gui.esm.js';
+
+
+let renderer, scene, camera, mesh;
+let startTime = performance.now();
+
+// -- Shader code -----------------------------------------------------
+
+// Vertex shader: pass UV coordinates to the fragment shader
+const vertexShader = /* glsl */ `
+  varying vec2 vUV;
+  void main(){
+    vUV = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+
+// Fragment shader: draws axes, a continuous waveform, discrete sampling dots+lines
+const fragmentShader = /* glsl */ `
+  varying vec2 vUV;
+
+  uniform float uTime;        // current time (for animation)
+  uniform float uWaveFreq;    // frequency of the wave
+  uniform float uWaveAmp;     // amplitude of the wave
+  uniform float uSampleFreq;  // sampling frequency
+  uniform float uLineWidth;   // thickness for lines in the visualization
+  uniform float uSpeed;       // how quickly the wave scrolls horizontally
+
+  // Helper: draws coordinate axes (x=0, y=0). Returns 1 if inside the axis line, else 0.
+  float drawAxisLine(vec2 pos, float lineWidth) {
+    // Check proximity to x=0 or y=0
+    float axisX = step(abs(pos.y), lineWidth); 
+    float axisY = step(abs(pos.x), lineWidth); 
+    return max(axisX, axisY);
+  }
+
+  // Draw continuous wave as a line near y = waveAmp * sin(2π * waveFreq * (x - speed * time))
+  float drawContinuousWave(vec2 pos, float freq, float amp, float time, float speed, float lineWidth) {
+    float waveY = amp * sin(2.0 * 3.14159 * (freq * (pos.x - speed * time)));
+    float dist = abs(pos.y - waveY);
+    return 1.0 - step(lineWidth, dist);
+  }
+
+  // Draw discrete sampling points and vertical lines to x-axis
+  // We sample the wave at x = n / sampleFreq (shifted by time*speed so wave moves under stationary samples).
+  // For each sample, we draw:
+  //   * a dot at (sampleX, sampleY), 
+  //   * a vertical line from (sampleX, 0) to (sampleX, sampleY).
+  float drawSampling(vec2 pos, float freq, float amp, float sampleFreq, float time, float speed, float lineWidth) {
+    float circleRadius = lineWidth * 2.0; // dot size
+    float result = 0.0;
+
+    // We'll do a simple loop from i=-100 to 100
+    for(int i=-100; i<=100; i++){
+      float iFloat = float(i);
+      // This is the x-position of the sample, let's keep them stationary as wave scrolls:
+      float sampleX = iFloat / sampleFreq;
+      // So wave moves left -> x - speed*time. But if we want the wave to scroll instead, we do wave’s phase shift:
+      float sampleY = amp * sin(2.0 * 3.14159 * freq * (sampleX - speed * time));
+      
+      // If sampleX is out of [ -1.2 .. 1.2 ], skip drawing
+      if (sampleX < -1.2 || sampleX > 1.2) {
+        continue;
+      }
+
+      // ---- 1) Dot at (sampleX, sampleY) ----
+      float dx = pos.x - sampleX;
+      float dy = pos.y - sampleY;
+      float dist2 = dx*dx + dy*dy; 
+      float inCircle = step(dist2, circleRadius*circleRadius);
+
+      // ---- 2) Vertical line from (sampleX, 0) to (sampleX, sampleY) ----
+      // If pos.x is near sampleX within lineWidth, and pos.y is between 0 and sampleY, we color it.
+      // We'll handle sign of sampleY so the line is drawn whether above or below x-axis:
+      float minY = min(0.0, sampleY);
+      float maxY = max(0.0, sampleY);
+      float withinY = (pos.y >= minY && pos.y <= maxY) ? 1.0 : 0.0;
+      float distX = abs(pos.x - sampleX);
+      float lineMask = (distX < lineWidth && withinY > 0.5) ? 1.0 : 0.0;
+      
+      // Combine
+      float pointOrLine = max(inCircle, lineMask);
+      result = max(result, pointOrLine);
+    }
+    return result;
+  }
+
+  void main() {
+    // Convert UV ([0..1]) to "world coords" in [-1..1]
+    vec2 worldPos = vec2(
+      mix(-1.0, 1.0, vUV.x),
+      mix(-1.0, 1.0, vUV.y)
+    );
+
+    // Draw the axes
+    float axisMask = drawAxisLine(worldPos, uLineWidth);
+
+    // Draw continuous wave
+    float waveMask = drawContinuousWave(worldPos, uWaveFreq, uWaveAmp, uTime, uSpeed, uLineWidth);
+
+    // Draw sampling (dots + vertical lines)
+    float samplingMask = drawSampling(worldPos, uWaveFreq, uWaveAmp, uSampleFreq, uTime, uSpeed, uLineWidth);
+
+    // Combine these layers. Priority: sampling > wave > axis
+    // Start with a white background:
+    vec3 color = vec3(1.0);
+
+    // Axis
+    if (axisMask > 0.5) {
+      color = mix(color, vec3(0.6, 0.6, 0.6), axisMask);
+    }
+    // Wave
+    if (waveMask > 0.5) {
+      color = mix(color, vec3(1.0, 0.2, 0.2), waveMask);
+    }
+    // Sampling
+    if (samplingMask > 0.5) {
+      color = mix(color, vec3(0.2, 0.4, 1.0), samplingMask);
+    }
+
+    gl_FragColor = vec4(color, 1.0);
+  }
+`;
+
+// -- Initialization --------------------------------------------------
+
+let uniforms = {
+  uTime:       { value: 0.0 },
+  uWaveFreq:   { value: 2.0 },   // Default wave frequency
+  uWaveAmp:    { value: 0.8 },   // Default wave amplitude
+  uSampleFreq: { value: 5.0 },   // Default sampling frequency
+  uLineWidth:  { value: 0.008 }, // Default line thickness
+  uSpeed:      { value: 0.5 }    // Slower speed factor
+};
+
+init();
+animate();
+
+function init() {
+  renderer = new THREE.WebGLRenderer({antialias: true});
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
+
+  scene = new THREE.Scene();
+  camera = new THREE.OrthographicCamera(-1,1,1,-1,0,1);
+
+  // Full-screen quad
+  const geometry = new THREE.PlaneGeometry(2, 2);
+
+  // Shader material
+  const material = new THREE.ShaderMaterial({
+    vertexShader,
+    fragmentShader,
+    uniforms
+  });
+
+  mesh = new THREE.Mesh(geometry, material);
+  scene.add(mesh);
+
+  // Event listeners
+  window.addEventListener('resize', onWindowResize);
+
+  // Setup the GUI
+  const gui = new GUI();
+  gui.add(uniforms.uWaveFreq, 'value', 0.1, 10.0, 0.1).name('Wave Frequency');
+  gui.add(uniforms.uWaveAmp, 'value', 0.1, 2.0, 0.1).name('Wave Amplitude');
+  gui.add(uniforms.uSampleFreq, 'value', 1.0, 20.0, 0.1).name('Sampling Freq');
+  gui.add(uniforms.uLineWidth, 'value', 0.001, 0.03, 0.001).name('Line Width');
+  gui.add(uniforms.uSpeed, 'value', 0.0, 2.0, 0.01).name('Wave Speed');
+}
+
+function onWindowResize() {
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+// -- Animation loop --------------------------------------------------
+
+function animate() {
+  requestAnimationFrame(animate);
+  const elapsed = (performance.now() - startTime) * 0.001;
+
+  // Slow down the time a bit in the wave function
+  uniforms.uTime.value = elapsed * 0.25; // Slows the scrolling to 1/4 speed
+
+  renderer.setRenderTarget(null);
+  renderer.render(scene, camera);
+}
+
+</script>
+</body>
+</html>

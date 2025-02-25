@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Live Mic Input + Sampling & Fourier Visualization</title>
+  <style>
+    body { margin: 0; overflow: hidden; }
+    #info {
+      position: absolute; top: 0; left: 0; z-index: 10;
+      background: rgba(255,255,255,0.9);
+      font-family: sans-serif; font-size: 14px;
+      padding: 8px; margin: 8px;
+      max-width: 400px;
+      line-height: 1.4em;
+    }
+    canvas { display:block; }
+  </style>
+</head>
+<body>
+<div id="info">
+  <h3>Live Microphone Input Demo</h3>
+  <p>
+    This demo uses <strong>Web Audio</strong> to capture your microphone signal (once you grant 
+    permission) and display two visualizations simultaneously using a <strong>Three.js</strong> shader:
+  </p>
+  <ul>
+    <li><em>Time-Domain Waveform</em> (left half) – how the signal varies in amplitude over time</li>
+    <li><em>Frequency Spectrum</em> (right half) – the strength of different frequency bins (FFT)</li>
+  </ul>
+  <p>
+    Try whistling, speaking, or playing a tone near your mic. The "bars" in the right half 
+    show which frequencies are present. This illustrates the <strong>Fourier decomposition</strong> of 
+    sampled audio in real time.
+  </p>
+  <p style="color:#c00;font-weight:bold;">
+    Note: This requires a secure (HTTPS) site or localhost, and permission to use your microphone.
+  </p>
+</div>
+
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.153.0/build/three.module.js';
+  import { GUI } from 'https://cdn.jsdelivr.net/npm/lil-gui@1.6.1/dist/lil-gui.esm.js';
+ 
+
+let renderer, scene, camera, mesh;
+let audioContext, analyser, dataTime, dataFreq;
+let dataTexTime, dataTexFreq;
+
+// For demonstration, we’ll show 1024 samples in the time domain, and 1024 bins in the frequency domain.
+const FFT_SIZE = 2048; 
+const HALF_SIZE = FFT_SIZE / 2;  // 1024
+
+// Shader code: We’ll split the screen horizontally:
+//   * Left half => time domain
+//   * Right half => frequency domain
+// We have two DataTextures: uTexTime and uTexFreq
+// Each is 1D data, but we store them as a 1 x N texture. In the fragment shader, we read from these textures.
+const vertexShader = /* glsl */ `
+  varying vec2 vUV;
+  void main(){
+    vUV = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+  }
+`;
+
+const fragmentShader = /* glsl */ `
+  varying vec2 vUV;
+
+  uniform sampler2D uTexTime;  // Time-domain samples in a 1D texture
+  uniform sampler2D uTexFreq;  // Frequency-domain magnitudes in a 1D texture
+  uniform float uTexSize;      // Number of samples/bins
+
+  void main(){
+    // vUV is in [0..1]. We split the screen: 
+    //   x < 0.5 => time domain
+    //   x >= 0.5 => frequency domain
+    float halfX = 0.5;
+
+    vec3 color = vec3(1.0); // default white background
+
+    if(vUV.x < halfX) {
+      // ------------- TIME DOMAIN -------------
+      // We'll map vUV.x from [0..0.5] to [0..1] for indexing the time data
+      float t = (vUV.x / halfX);     // 0..1
+      // Convert to sample index:
+      float index = t * (uTexSize - 1.0);  
+      // Because we have a 1D texture, we sample with (index / uTexSize) as the "u" coordinate
+      float uCoord = index / uTexSize;
+
+      // Read from time texture:
+      // data range is in [0..255], but in normalized texture it's [0..1]. 
+      // We'll center it around 0 => 0.5 means no amplitude, <0.5 negative, >0.5 positive, etc.
+      float sampleVal = texture2D(uTexTime, vec2(uCoord, 0.5)).r; 
+      // shift from [0..1] to [-1..+1]
+      sampleVal = (sampleVal - 0.5) * 2.0;
+
+      // That sampleVal is our wave’s amplitude at this x. Let's see if the fragment’s y is near that wave:
+      // vUV.y is [0..1], so let’s map that to [-1..+1] for drawing
+      float worldY = (vUV.y * 2.0) - 1.0;
+      // how close?
+      float dist = abs(worldY - sampleVal);
+      // if within some threshold, color it. Let’s pick 0.02 as thickness.
+      if(dist < 0.02) {
+        color = vec3(1.0, 0.2, 0.2); // red wave
+      }
+    } else {
+      // --------- FREQUENCY DOMAIN ------------
+      // We'll map vUV.x from [0.5..1.0] to [0..1] for indexing the freq data
+      float t = (vUV.x - 0.5) / (1.0 - 0.5); // 0..1
+      float index = t * (uTexSize - 1.0);
+      float uCoord = index / uTexSize;
+
+      // Read from freq texture:
+      float mag = texture2D(uTexFreq, vec2(uCoord, 0.5)).r;
+      // Typically in [0..1]. We'll treat that as amplitude for vertical "bars."
+
+      // vUV.y is in [0..1]. We can say a bar extends from bottom=0 up to 'mag' in that range.
+      if(vUV.y < mag) {
+        // color the bar in a nice blue
+        color = mix(vec3(0.2, 0.5, 1.0), vec3(1.0), vUV.y*0.2); 
+        // fancier gradient from bottom to top
+      }
+    }
+
+    gl_FragColor = vec4(color, 1.0);
+  }
+`;
+
+// We'll store everything in a uniforms object
+const uniforms = {
+  uTexTime:  { value: null },
+  uTexFreq:  { value: null },
+  uTexSize:  { value: HALF_SIZE }
+};
+
+init();
+requestMicrophone();
+animate();
+
+function init(){
+  renderer = new THREE.WebGLRenderer({antialias:true});
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
+
+  scene = new THREE.Scene();
+  camera = new THREE.OrthographicCamera(-1,1,1,-1,0,1);
+
+  const geometry = new THREE.PlaneGeometry(2,2);
+
+  const material = new THREE.ShaderMaterial({
+    vertexShader,
+    fragmentShader,
+    uniforms
+  });
+
+  mesh = new THREE.Mesh(geometry, material);
+  scene.add(mesh);
+
+  window.addEventListener('resize', onWindowResize);
+}
+
+function onWindowResize(){
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function requestMicrophone(){
+  // Attempt to get audio stream from user:
+  navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+    .then(handleMicStream)
+    .catch((err)=>{
+      console.error("Mic Access Denied:", err);
+    });
+}
+
+function handleMicStream(stream){
+  audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  const source = audioContext.createMediaStreamSource(stream);
+
+  analyser = audioContext.createAnalyser();
+  analyser.fftSize = FFT_SIZE;  // e.g. 2048
+  analyser.smoothingTimeConstant = 0.0;
+  
+  source.connect(analyser);
+
+  // Create buffers for time + frequency data
+  dataTime = new Uint8Array(FFT_SIZE);
+  dataFreq = new Uint8Array(HALF_SIZE); // half, because analyzer gives N/2 freq bins for getByteFrequencyData
+
+  // Create 1D DataTextures for the shader
+  //   1 x 2048 for time
+  //   1 x 1024 for frequency
+  dataTexTime = new THREE.DataTexture(dataTime, FFT_SIZE, 1, THREE.LuminanceFormat);
+  dataTexTime.minFilter = THREE.NearestFilter;
+  dataTexTime.magFilter = THREE.NearestFilter;
+  dataTexTime.needsUpdate = true;
+
+  dataTexFreq = new THREE.DataTexture(dataFreq, HALF_SIZE, 1, THREE.LuminanceFormat);
+  dataTexFreq.minFilter = THREE.NearestFilter;
+  dataTexFreq.magFilter = THREE.NearestFilter;
+  dataTexFreq.needsUpdate = true;
+
+  // Assign to uniforms
+  uniforms.uTexTime.value = dataTexTime;
+  uniforms.uTexFreq.value = dataTexFreq;
+}
+
+function animate(){
+  requestAnimationFrame(animate);
+
+  // If we have an analyser, pull the latest data
+  if(analyser){
+    // Time domain data => a snapshot of the waveform
+    analyser.getByteTimeDomainData(dataTime);
+    dataTexTime.needsUpdate = true;
+
+    // Frequency data => amplitude for each frequency bin
+    analyser.getByteFrequencyData(dataFreq);
+    dataTexFreq.needsUpdate = true;
+  }
+
+  renderer.setRenderTarget(null);
+  renderer.render(scene, camera);
+}
+</script>
+</body>
+</html>
