@@ -27,6 +27,20 @@
     /* header {
         margin-bottom: 30px;
     } */
+
+    .circle {
+        height: 50px;
+        width: 50px;
+        /* translate: 0px 0px; */
+        background-color: #555;
+        border-radius: 50%;
+        animation-name: circmove;
+        animation-duration:15s;
+        animation-direction: alternate;
+        animation-iteration-count: infinite;
+        animation-timing-function: ease-in-out;
+
+    }
     header, footer {
         color: rgb(163, 244, 244);
         animation-name: colorchange;
@@ -41,6 +55,11 @@
     @keyframes colorchange {
   from {background-color: rgb(163, 244, 244, 0);}
   to {background-color: rgb(163, 244, 244, 1);}
+    }
+  @keyframes circmove {
+  0% {translate: -5vw 0px}
+  50% {translate: 50vw 300px}
+  100% {translate: 105vw 0px}
   
   /* to {background-color: hsl(260, 100%, 50%);} */
 }
@@ -137,11 +156,16 @@
         margin: 0em;
         display: block;
         width: 100%;
-        height: 1000px;
-        background-color: rgb(158, 209, 233);
+        height: 700px;
         border: none;
         padding: 0;
+        z-index: -1;
+        background-color: rgb(18, 36, 44);
 
+    }
+
+    label {
+      z-index: 1;
     }
 
 /* filters section */
@@ -151,15 +175,15 @@
       max-height:700px;
       margin: 0;
       background: #000;
-      /* z-index: 1; */
+      z-index: 0;
     }
     #controls {
-      width: 200px;
+      width: 100px;
+      display: block;
       margin: 1rem auto;
-      display: flex;
       flex-direction: column;
-      gap: 0.5rem;
-      z-index: 1;
+      gap: 0.5rem; 
+      z-index: 3;
       
     }
     #shaderCodeContainer {
@@ -167,6 +191,8 @@
       flex-direction: column;
       width: 400px;
       margin: 0.5rem auto;
+      z-index: 1;
+      
     }
     #fragmentShaderCode {
       width: 100%;
@@ -174,6 +200,13 @@
       font-family: monospace;
       white-space: pre;
       z-index: 1;
+    }
+    #effectSelect {
+      z-index:1;
+    }
+
+    #updateShaderBtn{
+      z-index:1;
     }
 
     /* links */
@@ -238,6 +271,9 @@
         and <br>
         Materializers of Experience
     </h1>
+    <div class = "circle">
+
+    </div>
     <!-- <nav aria-label="Main navigation">
       <ul>
         <li><a href="#section1-title">Defining Shaders</a></li>
@@ -258,7 +294,7 @@
 
     <section class="main-section" id="section1" aria-labelledby="section1-title">
       <h2 id="section1-title">Defining Shaders:</h2>
-      <p>"Shaders" instruct a computer's graphics processing unit (GPU) to calculate color, light, texture, and the illusion of depth in 3D environments. Programming languages include OpenGL Shading Language (GLSL) and High Level Shader Languae (HLSL) </p>
+      <p>"Shaders" instruct a computer's graphics processing unit (GPU) to calculate color, light, texture, and the illusion of depth in 3D environments. Programming languages include OpenGL Shading Language (GLSL) and High Level Shader Languae (HLSL). </p>
     </section>
 
 
@@ -319,14 +355,16 @@
         <h2 id="section6-title">Fourier</h2>
     </section>
     <section class="main-section" id="section9" aria-labelledby="section7-title">
-        <h2 id="section6-title">Filters</h2>
+        <h2 id="section6-title"></h2>
         <canvas id="glCanvas"></canvas>
 
   <!-- Controls for choosing effect and reloading shader -->
-  <div id="controls" diplay = "flex" z-index="2">
 
-      <label for="effectSelect">Choose Effect: </label>
-      <select id="effectSelect" z-index="2">
+
+  <!-- Fragment Shader Code Viewer/Editor -->
+  <div id="shaderCodeContainer">
+      <label for="effectSelect">Choose Filter: </label>
+      <select id="effectSelect">
         <option value="0">Normal</option>
         <option value="1">Black & White</option>
         <option value="2">Blur</option>
@@ -334,11 +372,7 @@
         <option value="4">Halftone</option>
       </select>
       <button id="updateShaderBtn">Recompile Shader</button>
-    
-  </div>
 
-  <!-- Fragment Shader Code Viewer/Editor -->
-  <div id="shaderCodeContainer" z-index="1">
     <label for="fragmentShaderCode">Fragment Shader Code:</label>
     <textarea id="fragmentShaderCode"></textarea>
   </div>
