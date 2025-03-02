@@ -297,22 +297,98 @@
       <p>"Shaders" instruct a computer's graphics processing unit (GPU) to calculate color, light, texture, and the illusion of depth in 3D environments. Programming languages include OpenGL Shading Language (GLSL) and High Level Shader Languae (HLSL). </p>
     </section>
 
-
-    <section class="main-section" id="section4" aria-labelledby="section4-title">
-      <h2 id="section4-title">Media Archaeological Practices</h2>
-      <p>Offer examples or case studies to illustrate your points.</p>
+    <section class="main-section" id="section7" aria-labelledby="section7-title" style="position: relative;">
+      <!-- Three.js library -->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+      <!-- Camera UI overlay: Shows current X, Y, and Z positions -->
+      <div id="cameraUI" style="position: absolute; top: 10px; left: 10px; color: #fff; background: rgba(0,0,0,0.6); padding: 8px; border-radius: 4px;">
+        <p><strong>Camera Position</strong></p>
+        <p>X: <span id="cameraXVal"></span></p>
+        <p>Y: <span id="cameraYVal"></span></p>
+        <p>Z: <span id="cameraZVal"></span></p>
+      </div>
+    
+      <!-- Explanation of vector storage -->
+      <div id="explanation" style="position: absolute; top: 250px; left: 10px; color: #fff; background: rgba(0,0,0,0.6); padding: 8px; border-radius: 4px; max-width: 300px;">
+        <p>
+          A camera position is stored as a vector, which means it uses three values 
+          (<strong>x</strong>, <strong>y</strong>, <strong>z</strong>) describing location in 3D space.
+        </p>
+        <p>
+          A vector also has <em>magnitude</em> (its length) and <em>direction</em>. When moving or 
+          navigating in 3D, changing these vector components determines how far (magnitude) and 
+          in which direction (x-, y-, or z-axis) you move.
+        </p>
+      </div>
+    
+      <script>
+        // Scene, camera, and renderer setup
+        const container4 = document.getElementById('section7');
+        const scene4 = new THREE.Scene();
+        const camera4 = new THREE.PerspectiveCamera(
+          75,
+          container4.clientWidth / container4.clientHeight,
+          0.1,
+          1000
+        );
+        const renderer4 = new THREE.WebGLRenderer();
+        renderer4.setSize(container4.clientWidth, container4.clientHeight);
+        container4.appendChild(renderer4.domElement);
+    
+        // Simple plane (wireframe)
+        const waveGeometry4 = new THREE.PlaneGeometry(20, 20, 100, 100);
+        const waveMaterial4 = new THREE.MeshBasicMaterial({ color: 0xff6600, wireframe: true });
+        const waveMesh4 = new THREE.Mesh(waveGeometry4, waveMaterial4);
+        waveMesh4.rotation.x = -Math.PI / 2;
+        scene4.add(waveMesh4);
+    
+        // Initial camera position
+        camera4.position.set(0, 3, 5);
+    
+        // Track arrow keys
+        let keys = {};
+        window.addEventListener('keydown', (e) => (keys[e.key] = true));
+        window.addEventListener('keyup', (e) => (keys[e.key] = false));
+    
+        // References for displaying camera position
+        const cameraXVal = document.getElementById('cameraXVal');
+        const cameraYVal = document.getElementById('cameraYVal');
+        const cameraZVal = document.getElementById('cameraZVal');
+    
+        // Update camera position based on arrow keys
+        function updateCameraPositionFromKeys() {
+          if (keys['ArrowUp']) camera4.position.z -= 0.1;
+          if (keys['ArrowDown']) camera4.position.z += 0.1;
+          if (keys['ArrowLeft']) camera4.position.x -= 0.1;
+          if (keys['ArrowRight']) camera4.position.x += 0.1;
+    
+          // Ensure the camera looks at the center
+          camera4.lookAt(0, 0, 0);
+        }
+    
+        // Reflect the camera's current position on screen
+        function updateCameraDisplay() {
+          cameraXVal.textContent = camera4.position.x.toFixed(1);
+          cameraYVal.textContent = camera4.position.y.toFixed(1);
+          cameraZVal.textContent = camera4.position.z.toFixed(1);
+        }
+    
+        // Animation loop
+        function animateFourth() {
+          updateCameraPositionFromKeys();
+          updateCameraDisplay();
+          renderer4.render(scene4, camera4);
+          requestAnimationFrame(animateFourth);
+        }
+        animateFourth();
+      </script>
     </section>
+    
 
-    <section class="main-section" id="section5" aria-labelledby="section5-title">
-      <h2 id="section5-title">Vectors</h2>
-      <p>Format of vectors</p>
-    </section>
-
-    <section class="main-section" id="section6" aria-labelledby="section6-title">
-      <h2 id="section6-title">Trigonometric Functions</h2>
-      <p>How do mathematical repesentations of oscillation assume a regularized change?</p>
-    </section>
-
+    
+   
+<!-- 
     <section class="main-section" id="section7" aria-labelledby="section7-title">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
         <script>
@@ -350,7 +426,7 @@
         }
         animateFourth();
     </script>
-    </section>
+    </section> -->
     <section class="main-section" id="section8" aria-labelledby="section7-title">
         <h2 id="section6-title">Fourier</h2>
     </section>
