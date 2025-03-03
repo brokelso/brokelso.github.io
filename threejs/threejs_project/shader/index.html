@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Accessible HTML Example</title>
+  <title>GPU Shaders Brod</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
@@ -294,7 +294,9 @@
 
     <section class="main-section" id="section1" aria-labelledby="section1-title">
       <h2 id="section1-title">Defining Shaders:</h2>
-      <p>"Shaders" instruct a computer's graphics processing unit (GPU) to calculate color, light, texture, and the illusion of depth in 3D environments. Programming languages include OpenGL Shading Language (GLSL) and High Level Shader Languae (HLSL). </p>
+      <p><em>"Fragment Shaders"</em> instruct a computer's graphics processing unit (GPU) to calculate color, light, texture, and the illusion of depth in 3D environments. Programming languages include OpenGL Shading Language (GLSL) and High Level Shader Languae (HLSL). </p>
+    <p><em>"Compute Shaders"</em> are programs that run on the GPU for more general purpose computing, like data analysis. </p>
+    <p> The technology for <em>fragment shaders paved the way for compute shaders</em> -> the technology for rendering perceptual dimension paved the way for rendering conceptual dimension. </p>
     </section>
 
     <section class="main-section" id="section7" aria-labelledby="section7-title" style="position: relative;">
@@ -303,7 +305,7 @@
     
       <!-- Camera UI overlay: Shows current X, Y, and Z positions -->
       <div id="cameraUI" style="position: absolute; top: 10px; left: 10px; color: #fff; background: rgba(0,0,0,0.6); padding: 8px; border-radius: 4px;">
-        <p><strong>Camera Position</strong></p>
+        <p><strong>An illustration of the <em>vector</em> data type through a camera's position</strong></p>
         <p>X: <span id="cameraXVal"></span></p>
         <p>Y: <span id="cameraYVal"></span></p>
         <p>Z: <span id="cameraZVal"></span></p>
@@ -428,7 +430,14 @@
     </script>
     </section> -->
     <section class="main-section" id="section8" aria-labelledby="section7-title">
-        <h2 id="section6-title">Fourier</h2>
+        <h2 id="section6-title">Computing Vectors in Shaders</h2>
+        <p>
+          The above example demonstrates how the vector datatype is able to simulate 3D space by storing magitude and direction along spatial dimensions, but the visualization is not created by shaders (although they could write a program like this).
+        </p>
+        <p>
+          The below example uses shaders to "filter" the four color dimensions of a pixel: red, green, blue, and alpha (opacity). 
+          Look at the shader instructions for a particular filter like "Noise."
+        </p>
     </section>
     <section class="main-section" id="section9" aria-labelledby="section7-title">
         <h2 id="section6-title"></h2>
@@ -439,7 +448,7 @@
 
   <!-- Fragment Shader Code Viewer/Editor -->
   <div id="shaderCodeContainer">
-      <label for="effectSelect">Choose Filter: </label>
+      <label for="effectSelect">Select a Filter: </label>
       <select id="effectSelect">
         <option value="0">Normal</option>
         <option value="1">Black & White</option>
