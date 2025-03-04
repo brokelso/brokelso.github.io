@@ -7,7 +7,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
-  <style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+ <style>
 
     
     /* Basic styling for demonstration, feel free to modify or remove */
@@ -78,6 +79,21 @@
         letter-spacing: 25px;
         margin: 25px 0 0 0;
         font-weight: bold;
+    }
+ ::marker {
+      display: none;
+    }
+
+    img{
+      display: block;
+      text-align: center;
+      margin-left: auto;
+      margin-right: auto;
+      padding: 50px;
+      border: white solid 5px;
+      width: 75%;
+      margin-top: 10px;
+      margin-bottom: 10px;
     }
     em {
         color: rgb(163, 244, 244);
@@ -167,6 +183,46 @@
     label {
       z-index: 1;
     }
+
+    .step-wave {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            height: 100px;
+            background: repeating-linear-gradient(
+                90deg,
+                rgba(163, 244, 244, 1) 0%,
+                rgba(163, 244, 244, 1) 10%,
+                rgba(18, 36, 44, 1) 10%,
+                rgba(18, 36, 44, 1) 20%
+            );
+            background-size: 200% 100%;
+            animation: stepWave 3s infinite linear;
+            border-radius: 10px;
+        }
+
+        @keyframes stepWave {
+            0% {
+                background-position: 0% 0;
+            }
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        .sine-wave {
+            position: relative;
+            width: 100%;
+            height: 100px;
+            background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Sine_wave.svg/1200px-Sine_wave.svg.png');
+            background-size: 200px 100px;
+            animation: sineMove 3s linear infinite;
+        }
+
+        @keyframes sineMove {
+            0% { background-position: 0% 0; }
+            100% { background-position: -200px 0; }
+        }
 
 /* filters section */
     #glCanvas {
@@ -271,9 +327,9 @@
         and <br>
         Materializers of Experience
     </h1>
-    <div class = "circle">
+    <!-- <div class = "circle">
 
-    </div>
+    </div> -->
     <!-- <nav aria-label="Main navigation">
       <ul>
         <li><a href="#section1-title">Defining Shaders</a></li>
@@ -292,16 +348,23 @@
 
   <main id="main-content">
 
+    <section class="main-section">
+
+      <img src="images/severance1.png">
+      <img src="images/severance2.png">
+      <img src="images/reintegrationoscilloscope.png">
+    </section>
+
     <section class="main-section" id="section1" aria-labelledby="section1-title">
-      <h2 id="section1-title">Defining Shaders:</h2>
-      <p><em>"Fragment Shaders"</em> instruct a computer's graphics processing unit (GPU) to calculate color, light, texture, and the illusion of depth in 3D environments. Programming languages include OpenGL Shading Language (GLSL) and High Level Shader Languae (HLSL). </p>
+      <h2 id="section1-title">Defining shaders:</h2>
+      <p><em>"Fragment Shaders"</em> instruct a computer's graphics processing unit (GPU) to calculate color, light, texture, and the illusion of depth for 3D environments. Programming languages include OpenGL Shading Language (GLSL) and High Level Shader Language (HLSL). </p>
     <p><em>"Compute Shaders"</em> are programs that run on the GPU for more general purpose computing, like data analysis. </p>
     <p> The technology for <em>fragment shaders paved the way for compute shaders</em> -> the technology for rendering perceptual dimension paved the way for rendering conceptual dimension. </p>
     </section>
 
     <section class="main-section" id="section7" aria-labelledby="section7-title" style="position: relative;">
       <!-- Three.js library -->
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+      
     
       <!-- Camera UI overlay: Shows current X, Y, and Z positions -->
       <div id="cameraUI" style="position: absolute; top: 10px; left: 10px; color: #fff; background: rgba(0,0,0,0.6); padding: 8px; border-radius: 4px;">
@@ -398,49 +461,6 @@
         animateFourth();
       </script>
     </section>
-    
-
-    
-   
-<!-- 
-    <section class="main-section" id="section7" aria-labelledby="section7-title">
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-        <script>
-        const container4 = document.getElementById('section7');
-        const scene4 = new THREE.Scene();
-        const camera4 = new THREE.PerspectiveCamera(75, container4.clientWidth / container4.clientHeight, 0.1, 1000);
-        const renderer4 = new THREE.WebGLRenderer();
-        renderer4.setSize(container4.clientWidth, container4.clientHeight);
-        container4.appendChild(renderer4.domElement);
-    
-        const waveGeometry4 = new THREE.PlaneGeometry(20, 20, 100, 100);
-        const waveMaterial4 = new THREE.MeshBasicMaterial({ color: 0xff6600, wireframe: true });
-        const waveMesh4 = new THREE.Mesh(waveGeometry4, waveMaterial4);
-        waveMesh4.rotation.x = -Math.PI / 2;
-        scene4.add(waveMesh4);
-    
-        camera4.position.set(0, 3, 5);
-        let keys = {};
-    
-        window.addEventListener('keydown', (e) => (keys[e.key] = true));
-        window.addEventListener('keyup', (e) => (keys[e.key] = false));
-    
-        function updateCameraPosition() {
-          if (keys['ArrowUp']) camera4.position.z -= 0.1;
-          if (keys['ArrowDown']) camera4.position.z += 0.1;
-          if (keys['ArrowLeft']) camera4.position.x -= 0.1;
-          if (keys['ArrowRight']) camera4.position.x += 0.1;
-          camera4.lookAt(0, 0, 0);
-        }
-    
-        function animateFourth() {
-          updateCameraPosition();
-          renderer4.render(scene4, camera4);
-          requestAnimationFrame(animateFourth);
-        }
-        animateFourth();
-    </script>
-    </section> -->
     <section class="main-section" id="section8" aria-labelledby="section7-title">
         <h2 id="section6-title">Computing Vectors in Shaders</h2>
         <p>
@@ -789,6 +809,21 @@ void main() {
   </script>
   </section>
   <section class="main-section">
+    <h2>The GPU as discursive material</h2>
+  <ol>
+   <li>Discourse analysis tells us that the language, communication, power, and articulation surrounding knowledge makes knowledge possible. (Foucault)
+   </li> <li> 
+    Media archaeological analysis looks at what technological (material) articulations make knowledge possible. (Kittler)
+   </li>
+  <li>
+   <em>How do shaders articulate light and other data into forms of perception and knowing? </em>
+   </li>
+    -> Has the metaphor become the material?
+
+    Light and dimension become something that is <em>done</em>, and this doing becomes a precondition for perception.
+  </ol>
+  </section>
+  <!-- <section class="main-section">
     <h2 id="section6-title">The Question(s)</h2>
     <p>
       If trigonometric functions generate information and differentiation in knowledge (as illustrated by shader patterns)
@@ -796,10 +831,19 @@ void main() {
     <p>
       -> then <em>how do trigonometric functions make meaningful difference or differential meaning in data analysis?</em>
     </p>
+   -->
   </section>
   <section class="main-section">
     <h2 id="section6-title">Stakes</h2>
-    The shape of discourse....
+    
+    <ol>
+      <li>Feedback system between discourse and material locks in a certain mode of perception.</li>
+      <li>Humans become responsible for cuting the "human" out of technological feeback loops outside "human" perception.</li>
+      
+      </ol>
+      <!-- <div class="step-wave"></div>
+      <div class="sine-wave"></div> -->
+    
   </section>
 
     <section class="main-section">
@@ -809,19 +853,179 @@ void main() {
         BUT
       </p>
       <p>
-        Fluid dynamic simulators were tasked with creating a method to perfectly soft boil an egg. The problem, put forward my the researchers, is that eggs "are challenged by a two phase structure: albumen and yolk require two cooking temperatures."
+        luid dynamic simulators were tasked with creating a method to perfectly soft boil an egg. The problem, put forward my the researchers, is that eggs "are challenged by a two phase structure: albumen and yolk require two cooking temperatures."
       <br>
+
       https://www.nature.com/articles/s44172-024-00334-w
       </p>
+      <div display="flex" justify-content="center" flex-wrap="wrap">
+        <img src="images/periodicegg.png" alt="periodic cooking of an egg" width="40%" >
+        <img src="images/sensoryanalysis.png" alt="periodic cooking of an egg" width="40%" >
+        </div>
       <p>
-        The fluid simulators invented a new method for cooking <em>periodic cooking.</em>
+        The fluid simulators invented a new method for cooking called <em>periodic cooking.</em>
       </p>
       <p>
-       <em>Is this oscilatting method just a result of the over-representation of sine waves to simulate movement in computation? Or is there something inherently true and natural about this process?</em> 
+       <em>Is this oscilatting method just a result of the over-representation of wave forms (like sine) to simulate movement in computation? Or is there something inherently true and natural about this process?</em> 
+      </p>
+      <p>
+        Also important to note that sine wave introduce infinity, unlike stepped waves. But the infinity is generated by digital media.
       </p>
 
       </section>
-  <section class="main-section" id="section2" aria-labelledby="section2-title">
+    <!-- Three.js Shader Section -->
+  
+    <section id="shader-section" style="position: relative; width: 100%; height: 60vh; z-index: 0; display: block; justify-content: center; align-items: center; overflow: hidden;">
+      <div style="position: absolute; gap: 0.5rem; width: 90%; max-width: 600px; padding: 10px; background: rgba(0, 0, 0, 0.5); text-align: center; margin-top: 10px; z-index: 1;">
+        <div style="display: flex; justify-content: space-between; margin: 5px 0; ">
+            <label>Wave Speed</label>
+            <input type="range" id="waveSpeed" min="0.005" max="0.05" step="0.001" value="0.01">
+        </div>
+        <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+            <label>Wave Frequency</label>
+            <input type="range" id="waveFrequency" min="2.0" max="10.0" step="0.5" value="5.0">
+        </div>
+        <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+            <label>Color Intensity</label>
+            <input type="range" id="colorIntensity" min="0.1" max="2.0" step="0.1" value="1.0">
+        </div>
+        <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+            <label>Animation Speed</label>
+            <input type="range" id="animationSpeed" min="0.01" max="0.2" step="0.01" value="0.05">
+        </div>
+    </div>
+     
+      <div id="shader-container" style="width: 100%; height: 100%;" z-index="-1" position="absolute"></div>
+  
+
+ 
+</section>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+      // Three.js setup
+      let scene = new THREE.Scene();
+      let camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 10);
+      camera.position.z = 1;
+
+      let renderer = new THREE.WebGLRenderer();
+      renderer.setSize(window.innerWidth, window.innerHeight * 0.8);
+      document.getElementById("shader-container").appendChild(renderer.domElement);
+
+      // GLSL Shader with Animation Control
+      let fragmentShader = `
+          #ifdef GL_ES
+          precision mediump float;
+          #endif
+
+          #define PI 3.14159265359
+
+          uniform vec2 u_resolution;
+          uniform float u_time;
+          uniform float u_waveSpeed;
+          uniform float u_waveFrequency;
+          uniform float u_colorIntensity;
+          uniform float u_animationSpeed;
+
+          float plot(vec2 st, float pct) {
+              return smoothstep(pct - 0.02, pct, st.y) - 
+                     smoothstep(pct, pct + 0.02, st.y);
+          }
+
+          void main() {
+              vec2 st = gl_FragCoord.xy / u_resolution;
+
+              // Multiple animated sine waves with user controls
+              float wave1 = 0.5 + 0.3 * sin(u_waveFrequency * st.x + u_time * u_waveSpeed * u_animationSpeed);
+              float wave2 = 0.5 + 0.2 * cos((u_waveFrequency + 2.0) * st.x + u_time * (u_waveSpeed * 0.8) * u_animationSpeed);
+              float wave3 = 0.5 + 0.25 * sin((u_waveFrequency - 1.0) * st.x - u_time * (u_waveSpeed * 1.2) * u_animationSpeed);
+
+              float y = (wave1 + wave2 + wave3) / 3.0;
+
+              // Color based on wave mix, controlled by user
+              vec3 color = u_colorIntensity * vec3(sin(wave1 * PI), sin(wave2 * PI), sin(wave3 * PI));
+
+              float pct = plot(st, y);
+              color = mix(color, vec3(0.0, 1.0, 0.0), pct);
+
+              gl_FragColor = vec4(color, 1.0);
+          }
+      `;
+
+      // Create shader material
+      let material = new THREE.ShaderMaterial({
+          fragmentShader: fragmentShader,
+          uniforms: {
+              u_resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight * 0.8) },
+              u_time: { value: 0.0 },
+              u_waveSpeed: { value: 0.01 },
+              u_waveFrequency: { value: 5.0 },
+              u_colorIntensity: { value: 1.0 },
+              u_animationSpeed: { value: 0.05 }
+          }
+      });
+
+      // Fullscreen plane
+      let geometry = new THREE.PlaneGeometry(2, 2);
+      let mesh = new THREE.Mesh(geometry, material);
+      scene.add(mesh);
+
+      // Handle window resize
+      window.addEventListener('resize', function () {
+          let width = window.innerWidth;
+          let height = window.innerHeight * 0.8;
+          renderer.setSize(width, height);
+          material.uniforms.u_resolution.value.set(width, height);
+      });
+
+      // Animation loop
+      function animate() {
+          requestAnimationFrame(animate);
+          material.uniforms.u_time.value += material.uniforms.u_animationSpeed.value; // Control animation speed
+          renderer.render(scene, camera);
+      }
+
+      animate();
+
+      // Event Listeners for User Controls
+      document.getElementById("waveSpeed").addEventListener("input", function (e) {
+          material.uniforms.u_waveSpeed.value = parseFloat(e.target.value);
+      });
+
+      document.getElementById("waveFrequency").addEventListener("input", function (e) {
+          material.uniforms.u_waveFrequency.value = parseFloat(e.target.value);
+      });
+
+      document.getElementById("colorIntensity").addEventListener("input", function (e) {
+          material.uniforms.u_colorIntensity.value = parseFloat(e.target.value);
+      });
+
+      document.getElementById("animationSpeed").addEventListener("input", function (e) {
+          material.uniforms.u_animationSpeed.value = parseFloat(e.target.value);
+      });
+
+  });
+</script>
+</section>
+<section class="main-section">
+  <h2 class="">
+   Aperiodic life impulses
+  </h2>
+<!-- <img src="images/reintegrationoscilloscope.png"> -->
+<!-- <p>
+  This reads similar to heart monitors capturing the heart's electrical activity, but heart electrical pulses demonstrate more variability. A high heart rate variability (HRV) indicates higher ability to cope with stress and respond to environmental change.
+</p> -->
+<img src="images/patient-monitor-screen.png">
+<img src="images/aperiodicneuralwaves.png" alt="https://www.nature.com/articles/s41467-024-45922-8/figures/1">
+<figcaption>https://www.nature.com/articles/s41467-024-45922-8?fromPaywallRec=false</figcaption>
+<img src="images/aperiodicrepresentation.png" alt="">
+<figcaption>https://pubmed.ncbi.nlm.nih.gov/38083473/</figcaption>
+
+</section>
+
+
+        
+  <!-- <section class="main-section" id="section2" aria-labelledby="section2-title">
     <h2 id="section2-title"></h2>
     <p>
      <em>Programmers, computer scientists, and critical theorists have reduced software to
@@ -852,17 +1056,47 @@ void main() {
   <section class="main-section" id="section3" aria-labelledby="section3-title">
     <h2 id="section3-title">Vilém Flusser</h2>
     <p>Technical images:</p>
-  </section>
+  </section> -->
 
     
     <section class="main-section" id="section10" aria-labelledby="section10-title">
     References<br>
-    https://thebookofshaders.com/
+    Barad, Karen Michelle. Meeting the Universe Halfway: Quantum Physics and the Entanglement of Matter and Meaning. Durham: Duke University Press, 2007.
+    <br>
+    Brake, Niklas, Flavie Duc, Alexander Rokos, Francis Arseneau, Shiva Shahiri, Anmar Khadra, and Gilles Plourde. “A Neurophysiological Basis for Aperiodic EEG and the Background Spectral Trend.” Nature Communications 15, no. 1 (February 19, 2024): 1514. https://doi.org/10.1038/s41467-024-45922-8.
+
+   
+    <br>
+    Brod, Kelsey. “Infinity Fall.” Accessed March 4, 2025. https://www.kelseybrod.com/infinity-fall.
+<br>
+Foucault, Michel. Archaeology of Knowledge. Routledge Classics. London ; New York: Routledge, 2002.
+
+<br>
+    Gonzalez Vivo, Patricio and Jen Lowe“The Book of Shaders.” The Book of Shaders, https://thebookofshaders.com/. Accessed 3 Mar. 2025.
+    <br>
+    Gaboury, Jacob. Image Objects: An Archaeology of Computer Graphics. Cambridge, Massachusetts: The MIT Press, 2021.
+      <br>
+      Kittler, Friedrich A. Gramophone, Film, Typewriter. Writing Science. Stanford, Calif: Stanford University Press, 1999.
+
+      <br>
+
+      López-Alt, J. Kenji. “How to Boil the Perfect Egg.” The New York Times, September 23, 2019, sec. Food. https://www.nytimes.com/2019/09/23/dining/how-to-hard-boil-eggs.html.
+
+      <br>
+      McKittrick, Katherine, ed. Sylvia Wynter: On Being Human as Praxis. Durham: Duke University Press, 2015.
+      <br>
+      “The Perfect, but Slow, Way to Boil an Egg - According to Science,” February 6, 2025. https://www.bbc.com/future/article/20250206-the-perfect-way-to-boil-an-egg-according-to-science.
+
+      <br>
+    
+      
+
+
+
     </section>
 
     <section>
-       
-    </section>
+
 
   </main>
 

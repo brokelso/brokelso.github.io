@@ -1,27 +1,168 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" 
-  http-equiv="Content-Security-Policy"
-  content="script-src 'self' 'unsafe-eval'; object-src 'none'; base-uri 'none';"
-  
-  />
-  <title>Shader Navigation Example</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GPU Shaders Brod</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:wght@200;800&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <style>
+    /* Basic styling */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
     body {
-      margin: 0;
-      overflow: hidden;
+      font-family: "Atkinson Hyperlegible Mono", sans-serif;
+      background-color: rgb(18, 36, 44);
+      color: white;
+      line-height: 1.8;
+    }
+
+    header, footer {
+      padding: 3em;
+      text-align: center;
+      background-color: rgba(163, 244, 244, 0.2);
+      border-bottom: 6px solid rgb(63, 63, 111);
+    }
+
+    .title {
+      font-size: 50px;
+      letter-spacing: 10px;
+      font-weight: bold;
+      color: rgb(163, 244, 244);
+    }
+
+    h1, h2, em { color: rgb(163, 244, 244); }
+
+    .main-section {
+      padding: 20px;
+      margin: 2em auto;
+      max-width: 80%;
+      background-color: rgb(16, 18, 26);
+      border: 3px solid rgb(63, 63, 111);
+      font-size: 1.25em;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 600px) {
+      .main-section { max-width: 95%; }
+      .title { font-size: 30px; letter-spacing: 5px; }
+    }
+
+    /* Three.js shader section */
+    #shader-container {
+      width: 100%;
+      height: 60vh;
+      position: relative;
     }
   </style>
 </head>
 <body>
-  <!-- A canvas for Three.js to use (optional if you're using the default <canvas> from the renderer) -->
-  <canvas id="myCanvas"></canvas>
-  
-  <!-- Three.js library -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
-  
-  <!-- Our external script with the shader logic (no inline code) -->
-  <script src="app.js"></script>
+
+  <header>
+    <p class="title">GPU Shaders</p>
+    <h1>as Metaphors for and Materializers of Experience</h1>
+  </header>
+
+  <main id="main-content">
+
+    <!-- Section: Defining Shaders -->
+    <section class="main-section">
+      <h2>Defining Shaders</h2>
+      <p><em>"Fragment Shaders"</em> instruct a GPU to calculate color, light, and texture for rendering 3D environments using GLSL and HLSL.</p>
+      <p><em>"Compute Shaders"</em> allow GPUs to perform general-purpose parallel processing, used in physics simulations, AI, and data analysis.</p>
+      <p>Fragment shaders paved the way for compute shaders: technology for rendering perceptual dimensions enabled conceptual dimensions.</p>
+    </section>
+
+    <!-- Section: Three.js Shader Animation -->
+    <section class="main-section">
+      <h2>Interactive Shader Animation</h2>
+      <div id="shader-container"></div>
+    </section>
+
+    <!-- Wendy Chun -->
+    <section class="main-section">
+      <h2>Wendy Chun</h2>
+      <p><em>Code does not always or automatically do what it says...</em> Execution retroactively makes a piece of code a "source."</p>
+      <p>Source code is more accurately a <em>re-source</em> than an origin.</p>
+    </section>
+
+    <!-- Vilém Flusser -->
+    <section class="main-section">
+      <h2>Vilém Flusser</h2>
+      <p>Technical images as computational representations...</p>
+    </section>
+
+    <!-- Section: The Question -->
+    <section class="main-section">
+      <h2>The Question</h2>
+      <p>If trigonometric functions generate computational differentiation...</p>
+      <p>How do they make meaningful differences in data analysis?</p>
+    </section>
+
+    <!-- Section: The GPU -->
+    <section class="main-section">
+      <h2>The GPU</h2>
+      <p>GPUs process colors in parallel, operating on floating-point numbers...</p>
+    </section>
+
+    <!-- References -->
+    <section class="main-section">
+      <h2>References</h2>
+      <p>Gonzalez Vivo, Patricio and Jen Lowe. <em>The Book of Shaders</em>. <a href="https://thebookofshaders.com/">The Book of Shaders</a>.</p>
+      <p>Gaboury, Jacob. <em>Image Objects: An Archaeology of Computer Graphics</em>. MIT Press, 2021.</p>
+      <p><a href="https://www.bbc.com/future/article/20250206-the-perfect-way-to-boil-an-egg-according-to-science">BBC Future - Perfect Way to Boil an Egg</a></p>
+    </section>
+
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Kelsey Brod</p>
+  </footer>
+
+  <script>
+    // Three.js Shader Setup
+    document.addEventListener("DOMContentLoaded", function () {
+        let scene = new THREE.Scene();
+        let camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 10);
+        camera.position.z = 1;
+        let renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight * 0.6);
+        document.getElementById("shader-container").appendChild(renderer.domElement);
+
+        let fragmentShader = `
+            precision mediump float;
+            uniform vec2 u_resolution;
+            uniform float u_time;
+            void main() {
+                vec2 st = gl_FragCoord.xy / u_resolution;
+                float wave = 0.5 + 0.4 * sin(5.0 * st.x + u_time);
+                vec3 color = vec3(sin(wave * 3.14), cos(wave * 3.14), wave);
+                gl_FragColor = vec4(color, 1.0);
+            }
+        `;
+
+        let material = new THREE.ShaderMaterial({
+            fragmentShader: fragmentShader,
+            uniforms: {
+                u_resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight * 0.6) },
+                u_time: { value: 0.0 }
+            }
+        });
+
+        let geometry = new THREE.PlaneGeometry(2, 2);
+        let mesh = new THREE.Mesh(geometry, material);
+        scene.add(mesh);
+
+        function animate() {
+            requestAnimationFrame(animate);
+            material.uniforms.u_time.value += 0.02;
+            renderer.render(scene, camera);
+        }
+        animate();
+    });
+  </script>
+
 </body>
 </html>
