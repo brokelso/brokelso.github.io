@@ -309,13 +309,19 @@
         <p>X: <span id="cameraXVal"></span></p>
         <p>Y: <span id="cameraYVal"></span></p>
         <p>Z: <span id="cameraZVal"></span></p>
+        <p>Camera rotation X: <span id = "camerar"></span></p>
+        <p>Camera rotation Y: <span id = "camerary"></span></p>
+        <p>Camera rotation Z: <span id = "camerarz"></span></p>
       </div>
     
       <!-- Explanation of vector storage -->
-      <div id="explanation" style="position: absolute; top: 250px; left: 10px; color: #fff; background: rgba(0,0,0,0.6); padding: 8px; border-radius: 4px; max-width: 300px;">
+      <div id="explanation" style="position: absolute; top: 450px; left: 10px; color: #fff; background: rgba(0,0,0,0.6); padding: 8px; border-radius: 4px; max-width: 350px;">
         <p>
-          A camera position is stored as a vector, which means it uses three values 
+          The camera position is stored as a vector, which means it uses three values 
           (<strong>x</strong>, <strong>y</strong>, <strong>z</strong>) describing location in 3D space.
+        </p>
+        <p>
+          The camera rotation is also stored as a vector. What do the X, Y, Z rotations indicate?
         </p>
         <p>
           A vector also has <em>magnitude</em> (its length) and <em>direction</em>. When moving or 
@@ -357,6 +363,9 @@
         const cameraXVal = document.getElementById('cameraXVal');
         const cameraYVal = document.getElementById('cameraYVal');
         const cameraZVal = document.getElementById('cameraZVal');
+        const camerar = document.getElementById('camerar');
+        const camerary = document.getElementById('camerary');
+        const camerarz = document.getElementById('camerarz');
     
         // Update camera position based on arrow keys
         function updateCameraPositionFromKeys() {
@@ -374,6 +383,9 @@
           cameraXVal.textContent = camera4.position.x.toFixed(1);
           cameraYVal.textContent = camera4.position.y.toFixed(1);
           cameraZVal.textContent = camera4.position.z.toFixed(1);
+          camerar.textContent = camera4.rotation.x.toFixed(1);
+          camerary.textContent = camera4.rotation.y.toFixed(1);
+          camerarz.textContent = camera4.rotation.z.toFixed(1);
         }
     
         // Animation loop
@@ -438,6 +450,29 @@
           The below example uses shaders to "filter" the four color dimensions of a pixel: red, green, blue, and alpha (opacity). 
           Look at the shader instructions for a particular filter like "Noise."
         </p>
+       
+
+        </p>
+    </section>
+    <section class="main-section">
+      <h2 id="section6-title">The GPU</h2>
+      <p>
+        The hardware architecture of the GPU is composed of many microcprocessors also called <em>threads</em> that <em>parallel process</em></e> the color information and filter operations. Each thread is described as both <em>blind</em> and <em>memoryless</em>. 
+      </p>
+      <p>
+        In previous work, I explored the possibilities and limitations of real number representation method and datatype <em>floating point-arithmetic. </em>
+      </p>
+      <!-- <p>
+        Extending this FLOPS research to fragment shaders and compute shaders questions the hardware limitationa and abilities of mathematical/computational representation beyond number. Many operations, like trigonometric functions, rely on <em>"hardware accelerated"</em> versions.
+      </p> -->
+      <p>
+  
+      </p>
+      <!-- <p>
+        Early data analysis stored non-color data information as color vectors to compute the data using fragment shaders.
+      </p> -->
+      <p>
+      
     </section>
     <section class="main-section" id="section9" aria-labelledby="section7-title">
         <h2 id="section6-title"></h2>
@@ -753,6 +788,39 @@ void main() {
     window.onload = main;
   </script>
   </section>
+  <section class="main-section">
+    <h2 id="section6-title">The Question(s)</h2>
+    <p>
+      If trigonometric functions generate information and differentiation in knowledge (as illustrated by shader patterns)
+    </p>
+    <p>
+      -> then <em>how do trigonometric functions make meaningful difference or differential meaning in data analysis?</em>
+    </p>
+  </section>
+  <section class="main-section">
+    <h2 id="section6-title">Stakes</h2>
+    The shape of discourse....
+  </section>
+
+    <section class="main-section">
+      <h2 id="section6-title">"Science" tells us the best way to cook a boiled egg</h2>
+      <p>
+        We have no way to mathematically represent the egg economy right now..(lol)
+        BUT
+      </p>
+      <p>
+        Fluid dynamic simulators were tasked with creating a method to perfectly soft boil an egg. The problem, put forward my the researchers, is that eggs "are challenged by a two phase structure: albumen and yolk require two cooking temperatures."
+      <br>
+      https://www.nature.com/articles/s44172-024-00334-w
+      </p>
+      <p>
+        The fluid simulators invented a new method for cooking <em>periodic cooking.</em>
+      </p>
+      <p>
+       <em>Is this oscilatting method just a result of the over-representation of sine waves to simulate movement in computation? Or is there something inherently true and natural about this process?</em> 
+      </p>
+
+      </section>
   <section class="main-section" id="section2" aria-labelledby="section2-title">
     <h2 id="section2-title"></h2>
     <p>
