@@ -1,0 +1,67 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Podcast Visualization</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    button {
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    #podcast-list {
+      margin-top: 20px;
+    }
+    .podcast {
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .podcast h3 {
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Podcast Search</h1>
+  <button id="load-podcasts">Load Podcasts</button>
+  <div id="podcast-list"></div>
+
+  <script>
+    document.getElementById('load-podcasts').addEventListener('click', async () => {
+      const response = await fetch('http://localhost:5000/api/podcasts');
+      const data = await response.json();
+      
+      const podcastList = document.getElementById('podcast-list');
+      podcastList.innerHTML = '';
+      
+      if (data.results && data.results.length > 0) {
+        data.results.forEach(podcast => {
+          const podcastElement = document.createElement('div');
+          podcastElement.classList.add('podcast');
+          
+          podcastElement.innerHTML = `
+            <h3>${podcast.title}</h3>
+            <p><strong>Publisher:</strong> ${podcast.publisher}</p>
+            <p><strong>Description:</strong> ${podcast.description}</p>
+            <a href="${podcast.url}" target="_blank">Listen</a>
+          `;
+          
+          podcastList.appendChild(podcastElement);
+        });
+      } else {
+        podcastList.innerHTML = '<p>No podcasts found.</p>';
+      }
+    });
+  </script>
+</body>
+</html>

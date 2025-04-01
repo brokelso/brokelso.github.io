@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Podcast Topic Visualization</title>
+</head>
+<body>
+  <h1>Podcast Topic by Size</h1>
+  
+  <!-- Optional input if you want to search any topic dynamically -->
+  <input type="text" id="searchInput" placeholder="Enter a podcast topic">
+  <button id="searchBtn">Search</button>
+  
+  <!-- Canvas for Chart.js -->
+  <canvas id="podcastChart" width="600" height="400"></canvas>
+  
+  <!-- Load Chart.js (from a CDN, for convenience) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <script>
+    const searchBtn = document.getElementById('searchBtn');
+    const searchInput = document.getElementById('searchInput');
+    const chartCanvas = document.getElementById('podcastChart');
+    let podcastChart; // We'll store a reference to the chart instance
+
+    // Function to fetch data from our backend and draw the chart
+    async function fetchAndDraw(query = 'Technology') {
+      try {
+        // Call the backend route with the user’s query
+        const response = await fetch(`/api/podcasts?query=${encodeURIComponent(query)}`);
+        const data = await response.json();
+        
+        // data.results is typically an array of podcasts from Listen Notes
+        // Let's build a data array for Chart.js in "bubble" format:
+        // Each item needs: { x: someNumber, y: someNumber, r: bubbleRadius }
+        const bubbleData = data.results.map((podcast, index) => {
+          // For example, use 'total_episodes' as bubble radius (scaled down).
+          // If total_episodes is huge, we might do a square root or other factor.
+          const radius = Math.sqrt(podcast.total_episodes || 0); 
+          
+          return {
+            // x, y are arbitrary - let's spread them out by index
+            x: index,
+            y: index,
+            r: radius
+          };
+        });
+        
+        // If a chart instance already exists, destroy it before creating a new one
+        if (podcastChart) {
+          podcastChart.destroy();
+        }
+        
+        // Create the bubble chart
+        podcastChart = new Chart(chartCanvas, {
+          type: 'bubble',
+          data: {
+            datasets: [{
+              label: `Podcasts about "${query}"`,
+              data: bubbleData
+            }]
+          },
+          options: {
+            responsive: true,
+            scales: {
+              x: {
+                title: {
+                  display: true,
+                  text: 'Index (arbitrary)'
+                }
+              },
+              y: {
+                title: {
+                  display: true,
+                  text: 'Index (arbitrary)'
+                }
+              }
+            }
+          }
+        });
+      } catch (error) {
+        console.error('Error fetching or drawing data:', error);
+      }
+    }
+
+    // Handle the search button click
+    searchBtn.addEventListener('click', () => {
+      const query = searchInput.value.trim() || 'Technology';
+      fetchAndDraw(query);
+    });
+
+    // On page load, draw a default chart
+    fetchAndDraw('Technology');
+  </script>
+</body>
+</html>
